@@ -85,6 +85,7 @@ END
 
 $mech->content_contains( 'invalid' );
 
+
 # Testing class batch-updates.
 # At this point in the test, item 'n4' possesses one digital object class.
 # Item 'n5' has no classes at all.
@@ -200,4 +201,29 @@ is ( ( $n4->digital_objects )[1]->notes, 'Hello there.', "Notes are left untouch
 is ( ( $n4->bound_volumes )[0]->location->barcode, '9003',
        "Bound Volume's location barcode left untouched." );
 
+test_import( <<END
+<import>
+    <update>
+        <item number="n4">
+            <classes>
+                <digitalObject>
+                    <location>8002</location>
+                    <pid>somePid</pid>
+                    <fileExtension>.pdf</fileExtension>
+                </digitalObject>
+            </classes>
+        </item>
+    </update>
+</import>
+END
+);
+
+$n4->discard_changes;
+is ( ($n4->digital_objects)[-1]->file_extension->extension,
+     '.pdf',
+     'After a batch update, DO file extension field changed as expected.'
+);
+
+
 done_testing();
+
