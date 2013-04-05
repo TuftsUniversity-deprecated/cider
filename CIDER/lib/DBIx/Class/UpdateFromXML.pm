@@ -216,10 +216,13 @@ sub update_has_many_from_xml_hashref {
     my ( $hr, $relname, $proxy, $tag ) = @_;
 
     $tag ||= lcfirst( camelize( $relname ) );
+
     if ( exists( $hr->{ $tag } ) ) {
         $self->delete_related( $relname );
-        $self->create_related( $relname, { $proxy => $_->textContent } )
-            for @{ $hr->{ $tag } };
+        if ( ref( $hr->{ $tag } ) eq 'ARRAY' ) {
+            $self->create_related( $relname, { $proxy => $_->textContent } )
+                for @{ $hr->{ $tag } };
+        }
     }
 }
 
