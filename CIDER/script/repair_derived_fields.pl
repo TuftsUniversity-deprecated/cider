@@ -40,14 +40,13 @@ for my $leaf_id ( @$leaf_ids ) {
     my $leaf = $rs->find( $leaf_id );
     if ( $leaf ) {
         say $leaf->title;
-        if ( $leaf->date_from ) {
-            $leaf->object->date_from( $leaf->date_from );
-        }
-        if ( $leaf->date_to ) {
-            $leaf->object->date_to( $leaf->date_to );
-        }
-        if ( $leaf->accession_number ) {
-            $leaf->object->accession_numbers( $leaf->accession_number );
+
+        # Force recalculation of ancestors' date & accession-list fields.
+        $leaf->object->date_from( $leaf->date_from );
+        $leaf->object->date_to( $leaf->date_to );
+        $leaf->object->accession_numbers( $leaf->accession_number );
+        foreach ( qw/ date_from date_to accession_numbers / ) {
+            $leaf->object->make_column_dirty( $_ );
         }
 
         $leaf->define_restriction_summary;
