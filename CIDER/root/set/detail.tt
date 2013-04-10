@@ -20,6 +20,10 @@
 <div class="success_message">
 <p>All members of this set are now the children of object [% c.flash.batch_move_successful %].</p>
 </div>
+[% ELSIF c.flash.set_modified_from_search %]
+<div class="success_message">
+<p>The results of your most recent search have been added to this set.</p>
+</div>
 [% END %]
 
 [% IF set.scalar.objects.count %]

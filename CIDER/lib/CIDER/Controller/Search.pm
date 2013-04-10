@@ -100,9 +100,43 @@ sub create_set :Path('create_set') :Args(0) :FormConfig('set/create') {
     } );
 
     # Populate the new set with the results of the last query.
+    $c->stash->{ set } = $set;
+    $c->forward( '_add_query_results_to_set' );
+
+    # That done, redirect the user to the set list.
+    $c->flash->{ set_created_from_search } = $name;
+    $c->res->redirect( $c->uri_for( '/set/list' ) );
+}
+
+# /search/add_to_set: Add the results of the last query to a given set.
+sub add_to_set :Path('add_to_set') :Args(0) {
+    my ( $self, $c ) = @_;
+
+    my $set_id = $c->req->parameters->{ set_id };
+    my $set = $c->model( 'CIDERDB::ObjectSet' )->find( $set_id );
+
+    unless ( $set ) {
+        $c->res->redirect( $c->uri_for( '/search' ) );
+        $c->detach;
+    }
+
+    $c->stash->{ set } = $set;
+    $c->forward( '_add_query_results_to_set' );
+
+    # That done, redirect the user to the specified set's detail page.
+    $c->flash->{ set_modified_from_search } = 1;
+    $c->res->redirect( $c->uri_for_action( '/set/detail', [ $set_id ] ) );
+
+}
+
+sub _add_query_results_to_set :Private {
+    my ( $self, $c ) = @_;
+
+    my $set = $c->stash->{ set };
+
     my $query = $c->session->{ last_search_query };
     unless ( $query ) {
-        $c->log->error('Went to create_set without a last_search_query '
+        $c->log->error('Went to modify a set without a last_search_query '
                        . ' defined. Redirecting to the search page.');
         $c->res->redirect( $c->uri_for( '/search' ) );
         return;
@@ -125,9 +159,6 @@ sub create_set :Path('create_set') :Args(0) :FormConfig('set/create') {
         $set->add( $object->type_object );
     }
 
-    # That done, redirect the user to the set list.
-    $c->flash->{ set_created_from_search } = $name;
-    $c->res->redirect( $c->uri_for( '/set/list' ) );
 }
 
 =head2 make_index
