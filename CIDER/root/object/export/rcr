@@ -1,0 +1,63 @@
+[% c.res.content_type = 'application/xml' -%]
+[% USE date(format = '%Y-%m-%d') -%]
+[% FOR rc IN rcs -%]
+   <input OBJID="tufts:[% rc.record_id %]" LABEL="[% rc.name_entry.replace('"', '&quot;') %]" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.fedora.info/definitions/">
+
+     <metadata>
+             <metadata ID="DC">
+          <oai_dc:dc xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/">
+            <dc:title>[% rc.name_entry %]</dc:title>
+            <dc:type>Record Creator Record</dc:type>
+	    </oai_dc:dc>
+      </metadata>
+      
+      <metadata ID="DCA-META" LABEL="DCA Descriptive Metadata">
+        <dca_dc:dc xmlns:dca_dc="http://nils.lib.tufts.edu/dca_dc/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcatech="http://nils.lib.tufts.edu/dcatech/" xmlns:dcadesc="http://nils.lib.tufts.edu/dcadesc/">
+	    <dc:title>[% rc.name_entry %]</dc:title>
+       <dc:publisher>Digital Collections and Archives, Tufts University</dc:publisher>
+        <dc:rights>http://dca.tufts.edu/ua/access/rights.html</dc:rights>
+        <dc:identifier>[% rc.record_id %]</dc:identifier>
+        [% IF object.permanent_url -%]
+	    <dc:identifier>[% object.permanent_url %]</dc:identifier>
+	    [% ELSE -%]
+	    <dc:identifier>PUTHANDLEHERE</dc:identifier>
+	    [% END -%]
+	    
+	    [% IF rc.date_from %]
+	    <dc:date.created>[% rc.date_from %]</dc:date.created>
+	    [% END -%]	    
+	    <dc:date.available>[% rc.audit_trail.date_created.strftime('%Y-%m-%d') %]</dc:date.available>
+	    <dc:date.issued>[% date.format %]</dc:date.issued>
+	    <dc:type>text</dc:type>
+        <dc:format>text/xml</dc:format>
+     </dca_dc:dc>	    
+	</metadata>
+    
+        </metadata>
+    
+       
+      <datastreams>
+      <datastream ID="RCR-CONTENT" xlink:href="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/RCR/[% rc.record_id %].xml" xlink:title="[% rc.name_entry.replace('"', '&quot;') %]"/>
+    
+      <datastream ID="RELS-EXT" STATE="A" CONTROL_GROUP="X" VERSIONABLE="true">
+        <xmlContent>
+	  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:rel="info:fedora/fedora-system:def/relations-external#">
+	        <rdf:Description rdf:about="info:fedora/tufts:[% rc.record_id %]">
+	           <itemID xmlns="http://www.openarchives.org/OAI/2.0/">oai:tufts:[% rc.record_id %]</itemID>
+            <fedora-model:hasModel rdf:resource="info:fedora/cm:Text.RCR" xmlns:fedora-model="info:fedora/fedora-system:def/model/#"/>
+            <rel:isMemberOfCollection rdf:resource="info:fedora/tufts:UA069.006.DO.RCR"/>
+            <!-- INSERT RELATIONSHIPS TO OTHER RCRS HERE-->
+             [% FOR rels IN rc.record_context_relationships -%]
+    <rel:[% rels.type %] rdf:resource="info:fedora/tufts:[% FOR relrc IN rels.related_entity %][% relrc.record_id %]"/>
+    [% END -%]
+  [% END -%]
+                     
+	        </rdf:Description>
+	 </rdf:RDF>
+       </xmlContent>
+     </datastream>
+   </datastreams>
+    
+    
+   </input>
+[% END -%]
