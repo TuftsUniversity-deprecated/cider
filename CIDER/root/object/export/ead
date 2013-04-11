@@ -46,8 +46,17 @@
 	  check_for_p(series.description);
         "</scopecontent>";
         END;
+    IF series.restrictions == 'none';
+    "<accessrestrict>This series is open for research.</accessrestrict>";
+    ELSIF series.restrictions == 'some';
+    "<accessrestrict>Some of the records in this series are restricted. See the DCA's General Policy on Access for more information about access to records.</accessrestrict>";
+    ELSE;
+    "<accessrestrict>Access to this series is restricted. See the DCA's General Policy on Access for more information about access to records.</accessrestrict>";
+    END;
+    
       END;
 -%]	  	  
+     
 
 [%# Generates all the elements for a file or item. The <c0X> wrapper is generated in the body of the code -%]
 [% MACRO generate_item(object, type)
@@ -175,7 +184,7 @@
      [% IF collection.restrictions == 'none' -%]
        <p>This collection is open for research.</p>
      [% ELSIF collection.restrictions == 'some' -%]
-       <p>Some of the records in this collection are restrictred. See the DCA's General Policy on Access for more information about access to records.</p>
+       <p>Some of the records in this collection are restricted. See the DCA's General Policy on Access for more information about access to records.</p>
      [% ELSE -%]
        <p>Access to this collection is restricted. See the DCA's General Policy on Access for more information about access to records.</p>
      [% END -%]
