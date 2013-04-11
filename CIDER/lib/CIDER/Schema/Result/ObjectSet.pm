@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 use base 'DBIx::Class::Core';
+use Try::Tiny;
 
 use Carp qw(croak);
 
@@ -73,7 +74,18 @@ sub add {
     my $self = shift;
     my ( $object_to_add ) = @_;
 
-    $self->add_to_objects( $object_to_add->object );
+    # Try to add the object. If it fails with a not-unique error, then fine, the
+    # object is already a part of this set; carry on.
+    try {
+        $self->add_to_objects( $object_to_add->object );
+    }
+    catch {
+        unless ( / are not unique / ) {
+            # Oops, this is some other sort of error. Rethrow it.
+            # (It's a DBIx::Class::Exception object, so has this method.)
+            $_->rethrow;
+        }
+    };
 }
 
 sub remove {
