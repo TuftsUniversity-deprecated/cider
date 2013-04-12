@@ -51,7 +51,23 @@ sub set_up_held_object :Private {
 
 }
 
-sub detail :Chained('object') :PathPart('') :Args(0) :Form {
+sub detail :Chained('object') :PathPart('') :Args(0) {
+    my ( $self, $c ) = @_;
+
+    my $object = $c->stash->{ object };
+    unless ( defined( $object ) ) {
+        $c->detach( $c->controller( 'Root' )->action_for( 'default' ) );
+    }
+
+    $c->forward( '_setup_export_templates' );
+
+    my $type = $object->type;
+
+    # number_of_descendants is used by the deletion-confirmation dialog.
+    $c->stash->{ number_of_descendants } = $object->object->raw_descendants->count - 1;
+}
+
+sub edit :Chained('object') :PathPart('edit') :Args(0) :Form {
     my ( $self, $c ) = @_;
 
     my $object = $c->stash->{ object };

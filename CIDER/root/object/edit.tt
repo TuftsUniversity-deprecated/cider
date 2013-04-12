@@ -1,18 +1,69 @@
 [% page.title = object.title %]
 
+[% USE scalar %]
 
-[% IF we_just_created_this %]
+[% # Classes hash: variable_name => display_name 
+   # For display the item's class at the top of the detail page
+%]
+[% classes = { 
+   	   is_group = 'group' 
+	   file_folders = 'folder'
+	   containers = 'container'
+	   bound_volumes = 'bound volume'
+	   three_dimensional_objects = '3D object'
+	   audio_visual_media = 'a/v media'
+	   documents = 'document'
+	   physical_images = 'physical image'
+	   digital_objects = 'digital object'
+	   browsing_objects = 'browsing object'
+	   }
+-%]
+
+[% ancestors = object.ancestors %]
+<ul class="breadcrumb">
+  <li><a href="[% c.uri_for( c.controller('List').action_for('index') ) %]">Browse</a></li>
+[% FOREACH ancestor = ancestors %]
+  <li><span class="divider">&gt;</span><a href="[% c.uri_for( c.controller('Object').action_for('detail'), [ ancestor.number ] ) %]">[% ancestor.full_title %]</a></li>
+[% END %]
+</ul>
+
+<div class="page-header">
+<h2>[% page.title %]</h2>
+</div>
+
+[% IF object.type == 'item' -%]
+<div id="display-classes">
+[% FOR class IN classes.keys -%]
+[% IF object.$class -%]
+<span class="label label-info">[% classes.$class %]</span>
+[% END -%]
+[% END -%]
+</div>
+[% END -%]
+
+
+
+<div class="required_message">
+     <p>Fields marked with a '*' are required</p>
+</div>
+
+[% IF we_just_picked_this_up %]
 <div class="alert alert-success">
 <a class="close" data-dismiss="alert" href="#">x</a>
-<p>You have successfully created a new [% object.type %] with the title <strong>[% object.title %]</strong>.</p>
+<p>To finish moving this object, navigate to a different object (or <a href="[% c.uri_for('/') %]">the object root</a>) however you like, and then click the button that says "Make [% object.title %] a child of this object".</p>
 </div>
 [% END %]
 
-<h1>[% object.title %]</h1>
 
-<p>This is a dummy template for the new read-only object-detail view while I work on the backend.</p>
+[% form %]
 
-<p>Perhaps you would like to <a href="[% c.uri_for_action( '/object/edit', [ object.number ] ) %]">edit this object</a>.</p>
+<button id="delete" class="btn btn-danger" style="margin-left:15px; vertical-align:top;" onClick="toggle_deletion_confirmation_visibility()" >Delete</button>
+
+<form action="[% c.uri_for_action( c.controller('Object').action_for('clone'), [ object.number ] ) %]" style="display:inline;">
+<input type="submit" class="btn" name="clone_button" style="margin-left:10px;" value="Copy" />
+</form>
+[% INCLUDE object/delete_object_button.tt %]
+</div>
 
 <div class="span3">
   <div class="well">
@@ -137,3 +188,11 @@ as a child of this object. <input type="submit" class="btn clearfix" name="go" v
 </div>
 </div>
 </div>
+
+
+[% INCLUDE object/set_up_autocomplete_fields.tt %]
+
+<script>
+// Set the click handler for all the repeating-element [-] buttons.
+set_up_repeatable_clear_buttons();
+</script>
