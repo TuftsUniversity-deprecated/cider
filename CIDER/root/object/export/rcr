@@ -44,7 +44,7 @@
 	  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:rel="info:fedora/fedora-system:def/relations-external#">
 	        <rdf:Description rdf:about="info:fedora/tufts:[% rc.record_id %]">
 	           <itemID xmlns="http://www.openarchives.org/OAI/2.0/">oai:tufts:[% rc.record_id %]</itemID>
-            <fedora-model:hasModel rdf:resource="info:fedora/cm:Text.RCR" xmlns:fedora-model="info:fedora/fedora-system:def/model/#"/>
+            <fedora-model:hasModel rdf:resource="info:fedora/cm:Text.RCR" xmlns:fedora-model="info:fedora/fedora-system:def/model#"/>
             <rel:isMemberOfCollection rdf:resource="info:fedora/tufts:UA069.006.DO.RCR"/>
             <!-- INSERT RELATIONSHIPS TO OTHER RCRS HERE-->
              [% FOR rels IN rc.record_context_relationships -%]
