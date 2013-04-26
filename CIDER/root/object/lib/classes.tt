@@ -1,0 +1,14 @@
+[% IF object.classes %]
+<div id="object-classes">
+<h2>Classes</h2>
+
+[% FOR class IN object.classes %]
+    [% class_template = 'object/lib/item_class/'
+                        _ class.type.replace( ' ', '_' ) 
+                        _ '.tt'                    
+    %]
+    [% INCLUDE $class_template %]
+[% END %]
+
+</div> <!-- #object-classes -->
+[% END %]

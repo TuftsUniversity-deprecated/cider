@@ -1,0 +1,10 @@
+[% IF object.restriction_summary != 'none' %]
+<div id="object-restrictions">
+<h2>Restricted</h2>
+[% IF object.restrictions && object.restrictions.name != 'none' %]
+<p>[% object.restrictions.description %]</p>
+[% ELSE %]
+<p>[% object.restriction_summary FILTER ucfirst %] of the items within this object have restrictions attached.</p>
+[% END %]
+</div> <!-- #object-restrictions -->
+[% END %]
