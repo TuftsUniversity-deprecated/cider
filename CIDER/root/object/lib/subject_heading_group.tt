@@ -4,10 +4,12 @@
 %]
 
 [% IF object.$method %]
+<div class="object-subject_headings">
 <h3>[% title %]</h3>
 <ul>
 [% FOR heading IN object.$method %]
 <li>[% heading.name_and_note %]</li>
 [% END %]
 </ul>
+</div> <!-- .object-subject_headings -->
 [% END %]

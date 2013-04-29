@@ -1,0 +1,31 @@
+
+<div id="object-basic_info">
+[% INCLUDE object/lib/basic_info.tt %]
+</div>
+
+[% IF object.item.abstract %]
+<div id="object-abstract">
+<h2>Abstract</h2>
+<p>[% object.item.abstract %]</p>
+</div>
+[% END %]
+
+[% IF object.item.description %]
+<div id="object-description">
+<h2>Description</h2>
+<p>[% object.item.description %]</p>
+</div>
+[% END %]
+
+[% IF object.item.citation %]
+<div id="object-citation">
+<h2>Citation</h2>
+<p>[% object.item.citation %]</p>
+</div>
+[% END %]
+
+[% INCLUDE object/lib/restrictions.tt %]
+
+[% INCLUDE object/lib/subject_headings.tt %]
+
+[% INCLUDE object/lib/classes.tt %]

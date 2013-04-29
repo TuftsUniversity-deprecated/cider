@@ -92,3 +92,28 @@ div.button {
     float: left;
     margin-right: 20px;
 }
+
+/***********************
+ * OBJECT DETAIL PAGES *
+ ***********************/
+
+#object-detail th {
+    text-align: right;
+    padding-right: 10px;
+}
+
+.object-subject_headings {
+    margin-left: 20px;
+}
+
+.object-subject_headings ul {
+    margin-left: 40px;
+}
+
+.object-class {
+    margin-left: 20px;
+}
+
+.object-class table {
+    margin-left: 20px;
+}

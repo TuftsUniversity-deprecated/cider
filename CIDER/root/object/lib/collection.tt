@@ -1,0 +1,117 @@
+<table>
+<tr>
+<th>Inclusive dates</th>
+<td>
+[% object.dates %]
+</td>
+</tr>
+[% IF object.bulk_dates %]
+<tr>
+<th>Bulk dates</th>
+<td>
+[% object.bulk_dates %]
+</td>
+</tr>
+[% END %]
+[% IF object.permanent_url %]
+<tr>
+<th>Finding aid</th>
+<td>[% object.permanent_url %]</td>
+</tr>
+[% END %]
+<tr>
+<th>Publication status</th>
+<td>[% object.publication_status.name %]</td>
+</tr>
+<tr>
+<th>Extent</th>
+<td>[% object.extent %]</td>
+</tr>
+<tr>
+<th>Processing status</th>
+<td>[% object.processing_status.name %]</td>
+</tr>
+<tr>
+<th>Documentation</th>
+<td>[% object.documentation.description %]</td>
+</tr>
+<tr>
+<th>Accession numbers</th>
+<td>[% object.accession_numbers %]</td>
+</tr>
+<tr>
+<th>Scope</th>
+<td>[% object.scope %]</td>
+</tr>
+<tr>
+<th>Organization</th>
+<td>[% object.organization %]</td>
+</tr>
+[% FOR rcr IN object.primary_record_contexts %]
+<tr>
+<th>Primary RCR</th>
+<td>[% INCLUDE object/lib/rcr_summary.tt %]</td>
+</tr>
+[% END %]
+[% FOR rcr IN object.secondary_record_contexts %]
+<tr>
+<th>Secondary RCR</th>
+<td>[% INCLUDE object/lib/rcr_summary.tt %]</td>
+</tr>
+[% END %]
+[% IF object.history %]
+<tr>
+<th>Archival history</th>
+<td>[% INCLUDE object/lib/rcr_summary.tt %]</td>
+</tr>
+[% END %]
+[% IF object.processing_notes %]
+<tr>
+<th>Processing notes</th>
+<td>[% INCLUDE object/lib/rcr_summary.tt %]</td>
+</tr>
+[% END %]
+[% IF object.notes %]
+<tr>
+<th>Notes</th>
+<td>[% INCLUDE object/lib/rcr_summary.tt %]</td>
+</tr>
+[% END %]
+[% IF object.material.size %]
+<tr>
+<th>Associated material</th>
+<td>
+<ol>
+[% FOR material IN object.material %]
+<li>[% material.material %]</li>
+[% END %]
+</ol>
+</td>
+</tr>
+[% END %]
+[% IF object.subjects.size %]
+[% 
+subjects = [];
+FOR subject IN object.subjects;
+    subjects.push( subject.subject );
+END;
+%]
+<tr>
+<th>Subjects</th>
+<td>[% subjects.join( '; ' ) %]</td>
+</tr>
+[% END %]
+[% IF object.languages.size %]
+[% 
+languages = [];
+FOR language IN object.languages;
+    languages.push( language.language_name );
+END;
+%]
+<tr>
+<th>Languages</th>
+<td>[% languages.join( '; ' ) %]</td>
+</tr>
+[% END %]
+[% INCLUDE object/lib/restrictions.tt %]
+</table>

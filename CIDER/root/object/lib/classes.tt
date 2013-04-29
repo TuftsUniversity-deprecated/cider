@@ -7,7 +7,9 @@
                         _ class.type.replace( ' ', '_' ) 
                         _ '.tt'                    
     %]
+    <div class="object-class">
     [% INCLUDE $class_template %]
+    </div> <!-- .object-class -->
 [% END %]
 
 </div> <!-- #object-classes -->
