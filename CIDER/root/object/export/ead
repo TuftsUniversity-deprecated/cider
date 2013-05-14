@@ -188,6 +188,15 @@
      [% ELSE -%]
        <p>Access to this collection is restricted. See the DCA's General Policy on Access for more information about access to records.</p>
      [% END -%]
+     [% IF collection.processing_status == 'minimal' -%]
+     <p>This collection is minimally processed and may not be available for research. Contact the DCA for more information.</p>
+     [% ELSIF collection.processing_status == 'partial' -%]
+     <p>This collection is partially processed. Some materials may be restricted and not available for research. Contact the DCA for more information.</p>
+     [% ELSIF collection.processing_status == 'restricted' -%]
+     <p>This collection is processed, but some materials may be restricted and not available for research. Contact the DCA for more information.</p>
+     [% ELSIF collection.processing_status == 'open' -%]
+     <p>This collection is processed and open for research.</p>
+     [% END -%]
      </accessrestrict>
      <userestrict>
        <p>Some material may be copyrighted or restricted. It is the patron's obligation to determine and satisfy copyright or other case restrictions when publishing or otherwise distributing materials found in the collections. Please see the DCA's policy on Copyright and Fair Use for more information.</p>
