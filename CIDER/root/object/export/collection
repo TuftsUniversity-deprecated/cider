@@ -4,12 +4,20 @@
    <input OBJID="tufts:UA069.001.DO.[% object.number %]" LABEL="[% object.title.replace('"', '&quot;') %]" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.fedora.info/definitions/">
 
      <metadata>
-             <metadata ID="DC">
-          <oai_dc:dc xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/">
-  <dc:title>[% object.title %]</dc:title>
+        <metadata ID="DC">
+            <oai_dc:dc xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/">
+            <dc:title>[% object.title %]</dc:title>
  	    <dc:creator>Digital Collections and Archives</dc:creator>
 	    </oai_dc:dc>
-      </metadata>
+        </metadata>
+
+        <metadata ID="DCA-ADMIN" LABEL="DCA Administrative Metadata">
+            <ac xmlns:ac="http://purl.org/dc/dcmitype/" xmlns:local="http://nils.lib.tufts.edu/dcaadmin/" version="0.1">
+                <local:steward>dca</local:steward>
+                <local:displays>dl</local:displays>
+                <!-- ISO date of embargo end if embargo <local:embargo></local:embargo> -->
+            </ac>
+        </metadata>
       
       <metadata ID="DCA-META" LABEL="DCA Descriptive Metadata">
         <dca_dc:dc xmlns:dca_dc="http://nils.lib.tufts.edu/dca_dc/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcatech="http://nils.lib.tufts.edu/dcatech/" xmlns:dcadesc="http://nils.lib.tufts.edu/dcadesc/">
@@ -36,9 +44,9 @@
 	    <dc:date.available>[% object.audit_trail.date_created %]</dc:date.available>
 	    <dc:date.issued>[% date.format %]</dc:date.issued>
 	    <dc:type>text</dc:type>
-        <dc:format>text/xml</dc:format>
+            <dc:format>text/xml</dc:format>
           [% FOR subject IN object.subjects -%]
-        <dc:subject>[% subject.subject %]</dc:subject>
+            <dc:subject>[% subject.subject %]</dc:subject>
         [% END -%]
     
 	  </dca_dc:dc>	    
