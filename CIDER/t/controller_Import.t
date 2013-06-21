@@ -85,7 +85,6 @@ END
 
 $mech->content_contains( 'invalid' );
 
-
 # Testing class batch-updates.
 # At this point in the test, item 'n4' possesses one digital object class.
 # Item 'n5' has no classes at all.
@@ -210,6 +209,12 @@ test_import( <<END
                     <location>8002</location>
                     <pid>somePid</pid>
                     <fileExtension>.pdf</fileExtension>
+                    <applications>
+                        <checksum>Advanced Checksum Verifier</checksum>
+                        <virusCheck>OfficeScan Client</virusCheck>
+                        <other>
+                        </other>
+                    </applications>
                 </digitalObject>
             </classes>
         </item>
@@ -226,4 +231,3 @@ is ( ($n4->digital_objects)[-1]->file_extension->extension,
 
 
 done_testing();
-

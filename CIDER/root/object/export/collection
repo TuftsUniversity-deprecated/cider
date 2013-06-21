@@ -1,0 +1,77 @@
+[% c.res.content_type = 'application/xml' -%]
+[% USE date(format = '%Y-%m-%d') -%]
+[% FOR object IN objects -%]
+   <input OBJID="tufts:UA069.001.DO.[% object.number %]" LABEL="[% object.title.replace('"', '&quot;') %]" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.fedora.info/definitions/">
+
+     <metadata>
+        <metadata ID="DC">
+            <oai_dc:dc xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/">
+            <dc:title>[% object.title %]</dc:title>
+ 	    <dc:creator>Digital Collections and Archives</dc:creator>
+	    </oai_dc:dc>
+        </metadata>
+
+        <metadata ID="DCA-ADMIN" LABEL="DCA Administrative Metadata">
+            <ac xmlns:ac="http://purl.org/dc/dcmitype/" xmlns:local="http://nils.lib.tufts.edu/dcaadmin/" version="0.1">
+                <local:steward>dca</local:steward>
+                <local:displays>dl</local:displays>
+                <!-- ISO date of embargo end if embargo <local:embargo></local:embargo> -->
+            </ac>
+        </metadata>
+      
+      <metadata ID="DCA-META" LABEL="DCA Descriptive Metadata">
+        <dca_dc:dc xmlns:dca_dc="http://nils.lib.tufts.edu/dca_dc/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcatech="http://nils.lib.tufts.edu/dcatech/" xmlns:dcadesc="http://nils.lib.tufts.edu/dcadesc/">
+	    <dc:title>[% object.title %]</dc:title>
+        <dc:description>Finding aid for the [% object.title %] at the Digital Collections and Archives, Tufts University.</dc:description>
+        <dc:source>UA069</dc:source>
+       
+        <dcterms:isPartOf>UA069</dcterms:isPartOf>
+        <dcterms:isPartOf>[% object.number %]</dcterms:isPartOf>
+        <dc:creator>Digital Collections and Archives</dc:creator>
+        <dc:publisher>Digital Collections and Archives, Tufts University</dc:publisher>
+        <dc:rights>http://dca.tufts.edu/ua/access/rights.html</dc:rights>
+        
+        [% IF object.permanent_url -%]
+	    <dc:identifier>[% object.permanent_url %]</dc:identifier>
+	    [% ELSE -%]
+	    <dc:identifier>PUTHANDLEHERE</dc:identifier>
+	    [% END -%]
+	    
+	    [% IF object.date_from %]
+	    <dc:date.created>[% object.date_from %]</dc:date.created>
+	    [% END -%]
+	    
+	    <dc:date.available>[% object.audit_trail.date_created %]</dc:date.available>
+	    <dc:date.issued>[% date.format %]</dc:date.issued>
+	    <dc:type>text</dc:type>
+            <dc:format>text/xml</dc:format>
+          [% FOR subject IN object.subjects -%]
+            <dc:subject>[% subject.subject %]</dc:subject>
+        [% END -%]
+    
+	  </dca_dc:dc>	    
+	</metadata>
+    
+        </metadata>
+    
+       
+      <datastreams>
+      <datastream ID="Archival.xml" xlink:href="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/UA069/archival_xml/UA069.001.DO.[% object.number %].archival.xml" xlink:title="[% object.title.replace('"', '&quot;') %]"/>
+    
+      <datastream ID="RELS-EXT" STATE="A" CONTROL_GROUP="X" VERSIONABLE="true">
+        <xmlContent>
+	  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:rel="info:fedora/fedora-system:def/relations-external#">
+	        <rdf:Description rdf:about="info:fedora/tufts:UA069.001.DO.[% object.number %]">
+            <rel:isMemberOfCollection rdf:resource="info:fedora/tufts:UA069.006.DO.[% object.number %]"/>
+            <fedora-model:hasModel xmlns:fedora-model="info:fedora/fedora-system:def/model#" rdf:resource="info:fedora/cm:Text.EAD"/>
+            <itemID xmlns="http://www.openarchives.org/OAI/2.0/">oai:tufts:UA069.001.DO.[% object.number %]</itemID>
+
+	        </rdf:Description>
+	 </rdf:RDF>
+       </xmlContent>
+     </datastream>
+   </datastreams>
+    
+    
+   </input>
+[% END -%]

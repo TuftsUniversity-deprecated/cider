@@ -8,7 +8,7 @@ use lib (
     "$FindBin::Bin/../lib",
 );
 use CIDERTest;
-CIDERTest->init_schema;
+my $schema = CIDERTest->init_schema;
 
 use_ok( 'CIDER::Controller::Search' );
 
@@ -61,5 +61,13 @@ $mech->submit_form_ok( { with_fields => {
 } }, 'Search for title:Item and no description.' );
 $mech->content_contains( 'returned 1 object',
                          'Found 1 item with no volume.' );
-                         
+
+$mech->submit_form_ok( { with_fields => {
+    set_id => '1',
+} }, 'Submitting the add-to-set form.' );
+my $set_1 = $schema->resultset( 'ObjectSet' )->find( 1 );
+is( $set_1->count, 2, 'Set 1 now contains two objects.');
+$mech->content_contains( 'your most recent search have been added to this set',
+                         'We got redirected to the set detail page.' );
+
 done_testing;

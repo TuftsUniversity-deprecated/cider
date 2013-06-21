@@ -46,8 +46,17 @@
 	  check_for_p(series.description);
         "</scopecontent>";
         END;
+    IF series.restrictions == 'none';
+    "<accessrestrict>This series is open for research.</accessrestrict>";
+    ELSIF series.restrictions == 'some';
+    "<accessrestrict>Some of the records in this series are restricted. See the DCA's General Policy on Access for more information about access to records.</accessrestrict>";
+    ELSE;
+    "<accessrestrict>Access to this series is restricted. See the DCA's General Policy on Access for more information about access to records.</accessrestrict>";
+    END;
+    
       END;
 -%]	  	  
+     
 
 [%# Generates all the elements for a file or item. The <c0X> wrapper is generated in the body of the code -%]
 [% MACRO generate_item(object, type)
@@ -175,9 +184,18 @@
      [% IF collection.restrictions == 'none' -%]
        <p>This collection is open for research.</p>
      [% ELSIF collection.restrictions == 'some' -%]
-       <p>Some of the records in this collection are restrictred. See the DCA's General Policy on Access for more information about access to records.</p>
+       <p>Some of the records in this collection are restricted. See the DCA's General Policy on Access for more information about access to records.</p>
      [% ELSE -%]
        <p>Access to this collection is restricted. See the DCA's General Policy on Access for more information about access to records.</p>
+     [% END -%]
+     [% IF collection.processing_status == 'minimal' -%]
+     <p>This collection is minimally processed and may not be available for research. Contact the DCA for more information.</p>
+     [% ELSIF collection.processing_status == 'partial' -%]
+     <p>This collection is partially processed. Some materials may be restricted and not available for research. Contact the DCA for more information.</p>
+     [% ELSIF collection.processing_status == 'restricted' -%]
+     <p>This collection is processed, but some materials may be restricted and not available for research. Contact the DCA for more information.</p>
+     [% ELSIF collection.processing_status == 'open' -%]
+     <p>This collection is processed and open for research.</p>
      [% END -%]
      </accessrestrict>
      <userestrict>
