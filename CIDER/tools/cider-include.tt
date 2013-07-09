@@ -39,7 +39,7 @@
         <dcType>[% obj.dcType %]</dcType>
         [% END %]
         
-        [% IF obj.personalNames.length %]
+        [% IF obj.personalNames.size != 0 %]
         <personalNames>
             [% FOREACH name IN obj.personalNames %]
             <personalName>
@@ -49,7 +49,7 @@
         </personalNames>
         [% END %]
         
-        [% IF obj.corporateNames.length %]
+        [% IF obj.corporateNames.size != 0 %]
         <corporateNames>
             [% FOREACH name IN obj.corporateNames %]
             <corporateName>
@@ -59,7 +59,7 @@
         </corporateNames>
         [% END %]
         
-        [% IF obj.topicTerms.length %]
+        [% IF obj.topicTerms.size != 0 %]
         <topicTerms>
             [% FOREACH name IN obj.topicTerms %]
             <topicTerm>
@@ -69,7 +69,7 @@
         </topicTerms>
         [% END %]
         
-        [% IF obj.geographicTerms.length %]
+        [% IF obj.geographicTerms.size != 0 %]
         <geographicTerms>
             [% FOREACH name IN obj.geographicTerms %]
             <geographicTerm>
