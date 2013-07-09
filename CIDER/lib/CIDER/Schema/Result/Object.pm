@@ -547,6 +547,105 @@ sub children_sketch {
 
 }
 
+# next_object: Returns the next object in the whole CIDER object hierarchy.
+sub next_object {
+    my $self = shift;
+
+    # If I have any children, return the one with the dictionary-first number.
+    if ( $self->number_of_children ) {
+        return $self->objects->search(
+            {},
+            { rows => 1 },
+        )->single;
+    }
+
+    # Else, if I have a sibling with a later dictionary number than me, return it.
+    if ( my $sibling = $self->next_sibling ) {
+        return $sibling;
+    }
+
+    # Else, return my nearest "aunt" (ancestor's later-numbered sibling).
+    for my $ancestor ( reverse $self->raw_ancestors ) {
+        if ( my $aunt = $ancestor->next_sibling ) {
+            return $aunt;
+        }
+    }
+
+    # If we've come this far, we're all the way at the end of the browsable DB.
+    return undef;
+}
+
+# previous_object: Returns the next object in the whole CIDER object hierarchy.
+sub previous_object {
+    my $self = shift;
+
+    # If I have a previous sibling, return its dictionary-latest descendant.
+    # (This will be the sibling itself, if it has no descendants.)
+    my $previous_sibling = $self->previous_sibling;
+    if ( $previous_sibling ) {
+        return $previous_sibling->raw_descendants->search(
+            {},
+            {
+                rows => 1,
+                order_by => 'me.number desc',
+            },
+        )->single;
+    }
+
+    # If there's no previous sibling, then the previous object is the parent.
+    if ( my $parent = $self->parent ) {
+        return $parent;
+    }
+
+    # If we've come this far, we're all the way at the start of the browsable DB.
+    return undef;
+}
+
+# next_sibling: Return the object with my parent and the next-latest number (dictionary
+#               sort), if there is one.
+sub next_sibling {
+    my $self = shift;
+
+    return $self->siblings->search(
+        { number => { '>', $self->number } },
+        {
+            rows  => 1,
+            order => 'number',
+        },
+    )->single;
+}
+
+# previous_sibling: Return the object with my parent and the next-earliest number
+#                   (dictionary sort), if there is one.
+sub previous_sibling {
+    my $self = shift;
+
+    return $self->siblings->search(
+        { number => { '<', $self->number } },
+        {
+            rows  => 1,
+            order => 'number desc',
+        },
+    )->single;
+}
+
+# siblings: Return a resultset containing all objects sharing my parent, but not me.
+sub siblings {
+    my $self = shift;
+
+    my $parent_id;
+    if ( $self->parent ) {
+        $parent_id = $self->parent->id;
+    }
+
+    return $self->result_source->schema->resultset( 'Object' )->search(
+        {
+            parent => $parent_id,
+            id     => { '!=', $self->id },
+        }
+    );
+}
+
 =head1 LICENSE
 
 Copyright 2012 Tufts University

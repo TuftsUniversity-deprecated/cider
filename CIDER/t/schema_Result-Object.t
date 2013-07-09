@@ -210,4 +210,26 @@ $series->discard_changes;
 is ( $series->date_from, undef, 'Childless parent object removed its date_from.');
 is ( $series->date_to, undef, 'Childless parent object removed its date_to.');
 
+#########################
+# Testing next/prev stuff
+#########################
+# Reset the database.
+$schema = CIDERTest->init_schema;
+
+$series = $schema->resultset( 'Series' )->find( 3 );
+is ( $series->previous_object->id, '1', 'Series knows its previous object.' );
+is ( $series->next_object->id, '4', 'Series knows its next object.' );
+is ( $series->next_object->next_object->id, '5', 'Item4 knows its next object.' );
+is ( $series->next_object->next_object->next_object->id, '2',
+    'Item5 knows its next object (skipping up to the next ancestor-sibling).' );
+is ( $series->next_object->next_object->previous_object->id, '4',
+    'Item5 knows its previous object.' );
+is ( $series->next_object->next_object->next_object->previous_object->id, '5',
+    'Collection2 knows its previous object (drilling through sibling descendants).',);
+
+is ( $series->previous_object->previous_object, undef,
+    'Collection1 has no previous object.' );
+is ( $series->next_object->next_object->next_object->next_object, undef,
+    'Collection2 has no next object.' );
+
 done_testing;
