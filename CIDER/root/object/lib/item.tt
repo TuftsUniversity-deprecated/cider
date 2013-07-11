@@ -1,3 +1,4 @@
+[% INCLUDE object/lib/restrictions.tt %]
 
 <div id="object-basic_info">
 [% INCLUDE object/lib/basic_info.tt %]
@@ -23,8 +24,6 @@
 <p>[% object.item.citation %]</p>
 </div>
 [% END %]
-
-[% INCLUDE object/lib/restrictions.tt %]
 
 [% INCLUDE object/lib/subject_headings.tt %]
 
