@@ -610,7 +610,7 @@ sub next_sibling {
         { number => { '>', $self->number } },
         {
             rows  => 1,
-            order => 'number',
+            order_by => 'number',
         },
     )->single;
 }
@@ -624,7 +624,7 @@ sub previous_sibling {
         { number => { '<', $self->number } },
         {
             rows  => 1,
-            order => 'number desc',
+            order_by => 'number desc',
         },
     )->single;
 }
