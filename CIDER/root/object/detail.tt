@@ -19,13 +19,15 @@
 [% INCLUDE $object_template %]
 </div> <!-- #object-detail -->
 
-<p>Perhaps you would like to <a href="[% c.uri_for_action( '/object/edit', [ object.number ] ) %]">edit this object</a>.</p>
-
 </div>
 <div class="span3">
   <div class="well">
     <h3>Utilities</h3>
     <hr />
+
+    <h3><a href="[% c.uri_for_action( '/object/edit', [ object.number ] ) %]">Edit this object</a></h3>
+    <hr />
+
 
     <h3 data-toggle="collapse" data-target="#sets"><a href="#">Sets</a><i class="icon-chevron-right collapse-icon"></i></h3>
     <div id="sets" class="collapsable">
