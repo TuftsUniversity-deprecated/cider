@@ -1,10 +1,7 @@
-#!/tdr/bin/bin/perl 
+#!/usr/local/bin/perl
 
 # turn CSV files into CIDER import files
 
-use lib '/tdr/bin/lib/perl5/5.10.1';
-use lib '/tdr/bin/lib/perl5/site_perl/5.10.1';
-use lib '/tdr/bin/lib';
 use strict;
 use warnings;
 use Log::Log4perl qw(get_logger :levels);

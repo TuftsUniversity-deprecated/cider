@@ -28,6 +28,15 @@
 	    <dc:rights>http://dca.tufts.edu/ua/access/rights.html<!-- CHANGE RIGHTS URL --></dc:rights>
 	</oai_dc:dc>
       </metadata>
+
+      <metadata ID="DCA-ADMIN" LABEL="DCA Administrative Metadata">
+            <ac xmlns:ac="http://purl.org/dc/dcmitype/" xmlns:local="http://nils.lib.tufts.edu/dcaadmin/" version="0.1">
+                <local:steward>dca</local:steward>
+                <local:displays>dl</local:displays>
+                <!-- ISO date of embargo end if embargo <local:embargo></local:embargo> -->
+            </ac>
+      </metadata>
+
       <metadata ID="DCA-META" LABEL="DCA Descriptive Metadata">
         <dca_dc:dc xmlns:dca_dc="http://nils.lib.tufts.edu/dca_dc/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcatech="http://nils.lib.tufts.edu/dcatech/" xmlns:dcadesc="http://nils.lib.tufts.edu/dcadesc/">
 	    <dc:title>[% object.title %]</dc:title>
