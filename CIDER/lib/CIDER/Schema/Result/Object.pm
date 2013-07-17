@@ -587,7 +587,7 @@ sub previous_object {
             {},
             {
                 rows => 1,
-                order_by => 'me.number desc',
+                order_by => { -desc => 'me.number' },
             },
         )->single;
     }
@@ -624,7 +624,7 @@ sub previous_sibling {
         { number => { '<', $self->number } },
         {
             rows  => 1,
-            order_by => 'number desc',
+            order_by => { -desc => 'number' },
         },
     )->single;
 }
