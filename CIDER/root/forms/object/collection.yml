@@ -187,6 +187,7 @@ elements:
               counter_name: material_count
               model_config:
                 empty_rows: 1
+                new_rows_max: 100
               elements:
                 - type: Hidden
                   name: id
