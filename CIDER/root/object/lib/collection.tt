@@ -35,10 +35,12 @@
 <th>Documentation</th>
 <td>[% object.documentation.description %]</td>
 </tr>
+[% IF object.accession_numbers %]
 <tr>
 <th>Accession numbers</th>
 <td>[% object.accession_numbers %]</td>
 </tr>
+[% END %]
 <tr>
 <th>Scope</th>
 <td>[% object.scope %]</td>

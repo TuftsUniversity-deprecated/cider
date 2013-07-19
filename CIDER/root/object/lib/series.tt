@@ -17,10 +17,12 @@
 <th>Extent</th>
 <td>[% object.extent %]</td>
 </tr>
+[% IF object.accession_numbers %]
 <tr>
 <th>Accession numbers</th>
 <td>[% object.accession_numbers %]</td>
 </tr>
+[% END %]
 <tr>
 <tr>
 <th>Description</th>
