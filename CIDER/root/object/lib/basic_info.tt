@@ -26,7 +26,7 @@ IF object.type == 'item';
         class_formats.push( 'Group' );
     END;
     FOR class IN object.classes;
-        IF class.format;
+        IF class.format && class.format.name;
             format = ' (' _ class.format.name _ ')';
         ELSE;
             format = '';

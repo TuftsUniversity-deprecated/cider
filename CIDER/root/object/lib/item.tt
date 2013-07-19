@@ -4,24 +4,24 @@
 [% INCLUDE object/lib/basic_info.tt %]
 </div>
 
-[% IF object.item.abstract %]
+[% IF object.abstract %]
 <div id="object-abstract">
 <h2>Abstract</h2>
-<p>[% object.item.abstract %]</p>
+<p>[% object.abstract %]</p>
 </div>
 [% END %]
 
-[% IF object.item.description %]
+[% IF object.description %]
 <div id="object-description">
 <h2>Description</h2>
-<p>[% object.item.description %]</p>
+<p>[% object.description %]</p>
 </div>
 [% END %]
 
-[% IF object.item.citation %]
+[% IF object.citation %]
 <div id="object-citation">
 <h2>Citation</h2>
-<p>[% object.item.citation %]</p>
+<p>[% object.citation %]</p>
 </div>
 [% END %]
 
