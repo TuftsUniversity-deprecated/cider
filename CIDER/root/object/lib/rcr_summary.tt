@@ -1,2 +1,2 @@
-<a href="[% c.uri_for( c.controller( 'RecordContext' ).action_for( 'detail' ), [ rc.record_id] ) %]" target="[% rcr.record_id %]">[% rcr.record_id %] [% rcr.name_entry %]</a>
-[% IF rcr.history %]<br />[% rcr.history %][% END %]
+<a href="[% c.uri_for( c.controller( 'RecordContext' ).action_for( 'detail' ), [ rcr.record_id] ) %]" target="[% rcr.record_id %]">[% rcr.record_id %] [% rcr.name_entry %]</a>
+[% IF rcr.abstract %]<br />[% rcr.abstract %][% END %]

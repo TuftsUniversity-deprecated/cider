@@ -62,19 +62,19 @@
 [% IF object.history %]
 <tr>
 <th>Archival history</th>
-<td>[% INCLUDE object/lib/rcr_summary.tt %]</td>
+<td>[% object.history %]</td>
 </tr>
 [% END %]
 [% IF object.processing_notes %]
 <tr>
 <th>Processing notes</th>
-<td>[% INCLUDE object/lib/rcr_summary.tt %]</td>
+<td>[% object.processing_notes %]</td>
 </tr>
 [% END %]
 [% IF object.notes %]
 <tr>
 <th>Notes</th>
-<td>[% INCLUDE object/lib/rcr_summary.tt %]</td>
+<td>[% object.notes %]</td>
 </tr>
 [% END %]
 [% IF object.material.size %]
