@@ -22,8 +22,6 @@ __PACKAGE__->set_primary_key('id');
 __PACKAGE__->add_columns(
     username =>
         { data_type => 'varchar', is_nullable => 0 },
-    password =>
-        { data_type => 'varchar', is_nullable => 0 },
 );
 
 __PACKAGE__->add_columns(

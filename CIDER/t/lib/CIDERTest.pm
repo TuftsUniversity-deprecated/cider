@@ -108,8 +108,8 @@ sub init_schema {
     $schema->populate(
         'User',
         [
-            [qw/id username password staff/],
-            [1, 'alice', 'foo', 1],
+            [qw/id username staff/],
+            [1, 'alice', 1],
         ]
     );
 
