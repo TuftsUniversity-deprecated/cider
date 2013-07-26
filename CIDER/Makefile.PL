@@ -21,6 +21,7 @@ requires 'Catalyst::Action::RenderView';
 requires 'Catalyst::Model::Adaptor';
 requires 'Catalyst::Model::DBIC::Schema' => '0.50';
 requires 'Catalyst::View::TT';
+requires 'Catalyst::Authentication::Store::LDAP' => '1.014';
 requires 'Test::WWW::Mechanize::Catalyst' => '0.56';
 requires 'Moose';
 requires 'MooseX::MethodAttributes' => '0.25';
