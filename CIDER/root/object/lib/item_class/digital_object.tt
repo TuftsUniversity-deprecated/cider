@@ -1,0 +1,104 @@
+[%
+relationships = [];
+other_applications = [];
+FOR relationship IN class.digital_object_relationships;
+    relationships.push( relationship.predicate
+                        _ ' '
+                        _ relationship.pid
+                      );
+END;
+FOR application IN other_apps;
+    relationships.push( application.application );
+END;
+%]
+
+<h3>Digital Object</h3>
+<table>
+[% IF class.notes %]
+<tr>
+<th>Notes</th>
+<td>[% class.notes %]</td>
+</tr>
+[% END %]
+[% IF class.rights %]
+<tr>
+<th>Rights</th>
+<td>[% class.rights %]</td>
+</tr>
+[% END %]
+[% IF relationships.size %]
+<tr>
+<th>Relationships</th>
+<td>[% relationships.join( '; ') %]</td>
+</tr>
+[% END %]
+[% IF class.pid %]
+<tr>
+<th>PID</th>
+<td>[% class.pid %]</td>
+</tr>
+[% END %]
+</table>
+<h4>Preservation information</h4>
+<table>
+<tr>
+[% IF class.checksum %]
+<th>Checksum</th>
+<td>[% class.checksum %]</td>
+</tr>
+[% END %]
+[% IF class.file_extension %]
+<tr>
+<th>File extension</th>
+<td>[% class.file_extension %]</td>
+</tr>
+<tr>
+[% END %]
+[% IF class.original_filename %]
+<tr>
+<th>Original filename</th>
+<td>[% class.original_filename %]</td>
+</tr>
+[% END %]
+[% IF class.file_creation_date %]
+<th>File creation date</th>
+<td>[% class.file_creation_date %]</td>
+</tr>
+[% END %]
+[% IF class.stabilized_by %]
+<tr>
+<th>Stabilization</th>
+<td>Performed by [% class.stabilized_by.first_name %] [% class.stabilized_by.last_name %] on [% class.stabilization_date %] according to [% class.stabilization_procedure %].</td>
+[% END %]
+[% IF class.stabilization_notes %]
+<th>Stabilization notes</th>
+<td>[% class.stabilization_notes %]</td>
+</tr>
+[% END %]
+[% IF other_applications.size OR class.checksum_app OR class.media_app OR class.virus_app %]
+        <tr>
+        <th>Checksum</th>
+        <td>[% class.checksum_app.name %]</td>
+        </tr>
+        <tr>
+        <th>Media image</th>
+        <td>[% class.media_app.name %]</td>
+        </tr>
+        <tr>
+        <th>Virus check</th>
+        <td>[% class.virus_app.name %]</td>
+        </tr>
+        [% IF other_applications.size %]
+        <tr>
+        <th>Other Applications</th>
+        <td>[% other_applications.join( '; ') %]</td>
+        </tr>
+        [% END %]
+[% END %]
+[% IF class.toc %]
+<tr>
+<th>Table of contents</th>
+<td>[% class.toc %]</td>
+</tr>
+[% END %]
+</table>

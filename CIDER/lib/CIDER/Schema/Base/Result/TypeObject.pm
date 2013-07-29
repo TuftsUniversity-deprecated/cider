@@ -27,6 +27,7 @@ my @proxy_fields = qw( parent number title date_from date_to restriction_summary
 my @proxy_methods = qw( children number_of_children
                         ancestors has_ancestor descendants item_descendants
                         export update_parent dates full_title children_sketch
+                        previous_object next_object
                       );
 
 sub setup_object {

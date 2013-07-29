@@ -1,0 +1,85 @@
+<table>
+<tr>
+<th>Dates</th>
+<td>
+[% IF object.circa %]Circa [% END %]
+[% object.dates %]
+</td>
+</tr>
+<tr>
+<th>Location</th>
+[% 
+barcodes = [];
+FOR location IN object.locations;
+    barcodes.push( location.barcode );
+END;
+%]
+<td>[% barcodes.join( '; ' ) %]</td>
+</tr>
+<tr>
+<th>Type</th>
+<td>
+[%
+IF object.type == 'item';
+    class_formats = [];
+    IF object.is_group;
+        class_formats.push( 'Group' );
+    END;
+    FOR class IN object.classes;
+        IF class.format && class.format.name;
+            format = ' (' _ class.format.name _ ')';
+        ELSE;
+            format = '';
+        END;
+        class_formats.push( class.type.ucfirst _ format );
+    END;
+    class_formats.join( '; ' );
+ELSE;
+    object.type;
+END;
+%]  
+</td>
+</tr>
+[% IF object.digital_objects %]
+<tr>
+<th>URL</th>
+[%
+    urls = [];
+    FOR digital_object IN object.digital_objects;
+        urls.push( digital_object.permanent_url );
+    END;
+%]
+<td>[% urls.join( '; ' ) %]</td>
+</tr>
+[% END %]
+[% IF object.creators %]
+<tr>
+<th>Creator</th>
+[%
+    names = [];
+    FOR creator IN object.creators;
+        names.push( creator.name );
+    END;
+%]
+<td>[% names.join( '; ' ) %]</td>
+</tr>
+[% END %]
+[% IF object.accession_numbers %]
+<tr>
+<th>Accession number</th>
+<td>[% object.accession_numbers %]</td>
+</tr>
+[% END %]
+[% IF object.volume %]
+<tr>
+<th>Volume</th>
+<td>[% object.volume %]</td>
+</tr>
+[% END %]
+[% IF object.issue %]
+<tr>
+<th>Issue</th>
+<td>[% object.issue %]</td>
+</tr>
+[% END %]
+</table>

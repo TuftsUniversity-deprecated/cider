@@ -55,6 +55,9 @@ is( $obj->audit_trail->created_by->first_name, 'Alice',
 is( $obj->type_object->languages->first->language_name, 'English',
     'Default language is English.' );
 
+### Testing object editing
+
+$mech->get_ok( '/object/69105/edit' );
 $mech->content_contains( '"selected">Context 1',
                          'Record context was selected.' );
 
@@ -74,6 +77,7 @@ use DateTime;
 is( $obj->audit_trail->modification_logs->first->date, DateTime->today,
     'Date modified is today.' );
 
+$mech->get_ok( '/object/42/edit' );
 $mech->submit_form_ok( { with_fields => {
     bulk_date_from => '12-31-1999',
     bulk_date_to => '2003/01/13',
@@ -87,35 +91,44 @@ $mech->submit_form_ok( { with_fields => {
 } }, 'Use correct date format' );
 $mech->content_lacks( 'Sorry', 'Form submitted successfully.' );
 
+$mech->get_ok( '/object/42/edit' );
 $mech->submit_form_ok( { with_fields => {
     bulk_date_from => '1999-12',
     bulk_date_to => '2003',
 } }, 'Partial dates' );
 $mech->content_lacks( 'Sorry', 'Form submitted successfully.' );
 
-$mech->get_ok( $mech->uri );
+TODO: {
+local $TODO = '#163 - New detail template not finished yet.';
 $mech->content_contains( 'value="1999-12"', 'From date correct.' );
 $mech->content_contains( 'value="2003"', 'To date correct.' );
+}
 
+$mech->get_ok( '/object/42/edit' );
 $mech->submit_form_ok( { with_fields => {
     'languages_1.language' => 'ger',
     'languages_2.language' => 'fre',
 } }, 'Set multiple languages' );
 $mech->content_lacks( 'Sorry', 'Form submitted successfully.' );
+$mech->get_ok( '/object/42/edit' );
 is( $mech->value( 'languages_1.language' ), 'ger', 'German was set.' );
 is( $mech->value( 'languages_2.language' ), 'fre', 'French was set.' );
 
+$mech->get_ok( '/object/42/edit' );
 $mech->submit_form_ok( { with_fields => {
     'languages_1.language' => '',
     'languages_2.language' => 'fre',
 } }, 'Delete German' );
 $mech->content_lacks( 'Sorry', 'Form submitted successfully.' );
-is( $mech->value( 'languages_1.language' ), 'fre', 'German was deleted.' );
 
+$mech->get_ok( '/object/42/edit' );
+is( $mech->value( 'languages_1.language' ), 'fre', 'German was deleted.' );
 $mech->submit_form_ok( { with_fields => {
     'languages_1.language' => '',
 } }, 'Delete French' );
 $mech->content_lacks( 'Sorry', 'Form submitted successfully.' );
+
+$mech->get_ok( '/object/42/edit' );
 is( $mech->value( 'languages_1.language' ), 'eng', 'English is default.' );
 
 $mech->submit_form_ok( { with_fields => { type => 'item' } },
@@ -134,6 +147,9 @@ $mech->submit_form_ok( { with_fields => {
 } }, 'Created a sub-item with partial dates' );
 
 $mech->content_lacks( 'Sorry', 'Form submitted successfully.' );
+
+TODO: {
+local $TODO = '#163 - New detail template not finished yet.';
 $mech->content_contains( 'Æthelred' );
 $mech->content_like( qr/\b0968\b/ );
 $mech->content_like( qr/\b2011-06\b/ );
@@ -145,6 +161,7 @@ is( $child->parent->id, $obj->id, 'Item has correct parent.' );
 $mech->content_contains( '42 New test collection',
                          'Breadcrumb trail includes number.' );
 
+$mech->get_ok( '/object/II/edit' );
 $mech->submit_form_ok( { with_fields => {
     'item_creators_1.name' => 1,
     'item_personal_names_1.name' => 1,
@@ -154,6 +171,7 @@ $mech->content_lacks( 'Sorry', 'Form submitted successfully.' );
 
 $mech->content_contains( 'value="Test Name"', 'Names added.' );
 
+$mech->get_ok( '/object/II/edit' );
 $mech->submit_form_ok( { with_fields => {
     'file_folders_1.location' => 8,
 } }, 'Added a file folder class.' );
@@ -175,7 +193,7 @@ $mech->text_contains( '2011.004; 2011.005',
 $mech->text_contains( 'Restrictionsnone',
                       'Derived restrictions is some.' );
 
-$mech->get( '/object/n4' );
+$mech->get( '/object/n4/edit' );
 $mech->submit_form_ok( { with_fields => {
     restrictions => 2,
 } }, 'Set item 1 restrictions' );
@@ -185,12 +203,17 @@ $mech->text_contains( 'Restrictionssome',
                       'Derived restrictions is some.' );
 
 $mech->content_contains( 'does not belong' );
+}
+
+### Testing set addition
+$mech->get_ok( '/object/n1/edit' );
 $mech->submit_form_ok( { with_fields => {
     set_id => 1,
 } }, 'Add to set' );
 $mech->content_contains( 'belongs to the following' );
 $mech->has_tag( a => 'Test Set 1' );
 
+### Testing exports
 $mech->get( '/object/n1' );
 $mech->submit_form_ok( { with_fields => {
     descendants => 1,
@@ -246,7 +269,7 @@ $mech->content_contains( '>Test Name<', 'Authority name is exported.' );
 
 # TO DO: test delete button
 
-$mech->get( '/object/n1' );
+$mech->get( '/object/n1/edit' );
 $mech->submit_form_ok( { with_fields => {
     clone_button => 1,
 } }, 'Clicked the clone button' );

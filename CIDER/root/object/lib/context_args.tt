@@ -1,0 +1,15 @@
+[%# Set up a hash of context arguments that display_basic_object.tt knows
+    how to use.
+    These args assist in the proper display of context-aware next/prev buttons.
+%]
+[%
+IF context;
+    context_args = { 
+        'context'       => context,
+        'context_index' => context_index,
+        'set_id'        => set_id,
+    };
+ELSE;
+    context_args = { };
+END;
+%]

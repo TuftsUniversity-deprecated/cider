@@ -70,8 +70,10 @@ sub search :Path :Args(0) :FormConfig {
             $c->uri_for( '/search/create_set' )
         );
 
-        # Stick the last query in the session, for the create-set action's use.
+        # Stick the last query in the session, for the sake of the create-set action
+        # as well as the modified object-detail next/prev browsing buttons.
         $c->session->{ last_search_query } = $query;
+        $c->session->{ last_search_result_size } = $hits->total_hits;
     }
 }
 

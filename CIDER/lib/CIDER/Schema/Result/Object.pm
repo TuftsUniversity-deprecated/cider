@@ -547,6 +547,123 @@ sub children_sketch {
 
 }
 
+# next_object: Returns the next object in the whole CIDER object hierarchy.
+sub next_object {
+    my $self = shift;
+
+    my $type = $self->type;
+
+    # Return the first child that is the same type of object as this object, if
+    # there is such a thing.
+    if ( my $child = $self->objects->search(
+            {
+                "$type.id" => { '!=' => undef },
+            },
+            {
+                rows     => 1,
+                order_by => 'number',
+                join     => $type,
+            },
+        )->single ) {
+        return $child;
+    }
+
+    # Else, if I have a sibling with a later dictionary number than me, return it.
+    if ( my $sibling = $self->next_sibling ) {
+        return $sibling;
+    }
+
+    # Else, return my nearest "aunt" (ancestor's later-numbered sibling) that's the
+    # same type of object as this object.
+    for my $ancestor ( reverse $self->raw_ancestors ) {
+        last if $ancestor->type ne $type;
+        if ( my $aunt = $ancestor->next_sibling ) {
+            return $aunt;
+        }
+    }
+
+    # If we've come this far, we're all the way at the end of the browsable DB.
+    return undef;
+}
+
+# previous_object: Returns the next object in the whole CIDER object hierarchy.
+sub previous_object {
+    my $self = shift;
+
+    my $type = $self->type;
+
+    # If I have a previous sibling, return its dictionary-latest descendant of the
+    # same type as this object.
+    # (This will be the sibling itself, if it has no descendants.)
+    my $previous_sibling = $self->previous_sibling;
+    if ( $previous_sibling ) {
+        return $previous_sibling->raw_descendants->search(
+            {
+                "$type.id" => { '!=' => undef },
+            },
+            {
+                rows     => 1,
+                order_by => { -desc => 'me.number' },
+                join     => $type,
+            },
+        )->single;
+    }
+
+    # If there's no previous sibling, then the previous object is the parent... but only
+    # if the parent is of the same type as this object.
+    if ( my $parent = $self->parent) {
+        return $parent if $parent->type eq $type;
+    }
+
+    # If we've come this far, we're all the way at the start of the browsable DB.
+    return undef;
+}
+
+# next_sibling: Return the object with my parent and the next-latest number (dictionary
+#               sort), if there is one.
+sub next_sibling {
+    my $self = shift;
+
+    return $self->siblings->search(
+        { number => { '>', $self->number } },
+        {
+            rows  => 1,
+            order_by => 'number',
+        },
+    )->single;
+}
+
+# previous_sibling: Return the object with my parent and the next-earliest number
+#                   (dictionary sort), if there is one.
+sub previous_sibling {
+    my $self = shift;
+
+    return $self->siblings->search(
+        { number => { '<', $self->number } },
+        {
+            rows  => 1,
+            order_by => { -desc => 'number' },
+        },
+    )->single;
+}
+
+# siblings: Return a resultset containing all objects sharing my parent, but not me.
+sub siblings {
+    my $self = shift;
+
+    my $parent_id;
+    if ( $self->parent ) {
+        $parent_id = $self->parent->id;
+    }
+
+    return $self->result_source->schema->resultset( 'Object' )->search(
+        {
+            parent => $parent_id,
+            id     => { '!=', $self->id },
+        }
+    );
+}
+
 =head1 LICENSE
 
 Copyright 2012 Tufts University

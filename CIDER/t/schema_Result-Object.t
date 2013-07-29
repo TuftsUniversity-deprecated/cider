@@ -210,4 +210,37 @@ $series->discard_changes;
 is ( $series->date_from, undef, 'Childless parent object removed its date_from.');
 is ( $series->date_to, undef, 'Childless parent object removed its date_to.');
 
+#########################
+# Testing next/prev stuff
+#########################
+# Reset the database.
+$schema = CIDERTest->init_schema;
+$schema->user( $schema->resultset( 'User' )->find( 1 ) );
+
+# Stick in a new sub-item.
+$schema->resultset( 'Object' )->create( {
+                                            id => 6,
+                                            number => 'n5.1',
+                                            title => 'A subitem',
+                                            audit_trail => 1,
+                                            parent => '5', } );
+$schema->resultset( 'Item' )->create( {
+                                            id => 6,
+                                            dc_type => 1,
+                                            accession_number => '2011.004',
+                                            volume => undef,
+                                        } );
+
+$series = $schema->resultset( 'Series' )->find( 3 );
+is ( $series->previous_object, undef, 'Series knows it has no previous object.' );
+is ( $series->next_object, undef, 'Series knows it has next object.' );
+
+my $item = $schema->resultset( 'Item' )->find( 4 );
+is ( $item->next_object->id, '5', 'Item4 knows its next object.' );
+is ( $item->next_object->next_object->id, '6',
+    'Item5 knows its next object (investigating its descendants).' );
+is ( $item->next_object->previous_object->id, '4',
+    'Item5 knows its previous object.' );
+is ( $item->next_object->next_object->previous_object->id, '5',
+    'Item6 knows its next object (investigating its ancestors).' );
 done_testing;

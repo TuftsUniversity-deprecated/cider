@@ -262,6 +262,26 @@ sub update_from_xml {
     return $self;
 }
 
+=head2 bulk_dates
+
+The bulk-date or -dates of this collection, as a single string.
+
+=cut
+
+sub bulk_dates {
+    my $self = shift;
+
+    if ( my $from = $self->bulk_date_from ) {
+        my $to = $self->bulk_date_to;
+        if ( $to && $to ne $from ) {
+            return "$from&ndash;$to";
+        }
+        else {
+            return $from;
+        }
+    }
+}
+
 =head1 LICENSE
 
 Copyright 2012 Tufts University
