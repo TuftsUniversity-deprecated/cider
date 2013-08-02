@@ -46,10 +46,14 @@ END;
 [%
     urls = [];
     FOR digital_object IN object.digital_objects;
+        urls.push( '<a href="' );
         urls.push( digital_object.permanent_url );
+        urls.push( '">' );
+        urls.push( digital_object.permanent_url );
+        urls.push( '</a>' );
     END;
 %]
-<td>[% urls.join( '; ' ) %]</td>
+<td>[% urls.join( '' ) %]</td>
 </tr>
 [% END %]
 [% IF object.creators %]
