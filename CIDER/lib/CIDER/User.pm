@@ -44,10 +44,19 @@ around 'new' => sub {
 
     my $self = $class->$orig( @_ );
 
-    $self->context( $c );
-    $self->db_user( $self->_build_db_user );
+    if ( $self ) {
+        $self->context( $c );
+        $self->db_user( $self->_build_db_user );
 
-    return $self;
+        return $self;
+    }
+    else {
+        # Special case: if $self is undefined, then we have an out-of-date login.
+        # Force a refresh.
+
+        $c->logout;
+        $c->response->redirect( $c->uri_for( '/' ) );
+    }
 };
 
 sub _build_db_user {
