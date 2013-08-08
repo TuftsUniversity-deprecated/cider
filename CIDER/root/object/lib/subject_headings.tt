@@ -1,3 +1,12 @@
+[% USE scalar %]
+
+[% IF object.scalar.personal_names.count
+      + object.scalar.corporate_names.count
+      + object.scalar.topic_terms.count
+      + object.scalar.geographic_terms.count
+      > 0
+%]
+
 <div id="object-subject_headings">
 <h2>Subject Headings</h2>
 
@@ -23,3 +32,5 @@
 
 
 </div> <!-- #object-subject_headings" -->
+
+[% END %]

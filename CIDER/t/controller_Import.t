@@ -229,5 +229,21 @@ is ( ($n4->digital_objects)[-1]->file_extension->extension,
      'After a batch update, DO file extension field changed as expected.'
 );
 
+test_import( <<END
+<import>
+  <update>
+    <series number="n4">
+      <title>Test import type-change</title>
+      <arrangement>Some arrangement</arrangement>
+    </series>
+  </update>
+</import>
+END
+);
+
+my $changed_n4 = $schema->resultset( 'Object' )->find( 4 );
+is ( $changed_n4->type, 'item', 'Import prevented an illegal object type-change');
+isnt ( $changed_n4->title, 'Test import type-change', 'Bad import didnt change title');
+$mech->content_contains( 'Cannot update' );
 
 done_testing();

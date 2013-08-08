@@ -26,7 +26,7 @@ IF object.type == 'item';
         class_formats.push( 'Group' );
     END;
     FOR class IN object.classes;
-        IF class.format;
+        IF class.format && class.format.name;
             format = ' (' _ class.format.name _ ')';
         ELSE;
             format = '';
@@ -46,10 +46,14 @@ END;
 [%
     urls = [];
     FOR digital_object IN object.digital_objects;
+        urls.push( '<a href="' );
         urls.push( digital_object.permanent_url );
+        urls.push( '">' );
+        urls.push( digital_object.permanent_url );
+        urls.push( '</a>' );
     END;
 %]
-<td>[% urls.join( '; ' ) %]</td>
+<td>[% urls.join( '' ) %]</td>
 </tr>
 [% END %]
 [% IF object.creators %]

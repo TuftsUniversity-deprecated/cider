@@ -3,7 +3,7 @@
 
         <title>[% obj.title | html %]</title>
 
-        [% IF obj.creators.length %]
+        [% IF obj.creators != 0 %]
         <creators>
             [% FOREACH creator IN obj.creators %]
             <creator>
@@ -132,7 +132,9 @@
                 [% END %]
         
                 [% IF class.relationshipsPred != ""  %]
-                <relationships predicate="[% class.relationshipsPred %]">[% class.relationshipsPID %]</relationships>
+                <relationships>
+                <relationship predicate="[% class.relationshipsPred %]"><pid>[% class.relationshipsPID %]</pid></relationship>
+                </relationships>
                 [% END %]
         
                 [% IF class.checksum != ""  %]

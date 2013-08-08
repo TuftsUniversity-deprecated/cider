@@ -1,6 +1,6 @@
 [% IF object.restriction_summary != 'none' %]
 <div id="object-restrictions">
-<h2>Restricted</h2>
+<p>Restricted</p>
 [% IF object.restrictions && object.restrictions.name != 'none' %]
 <p>[% object.restrictions.description %]</p>
 [% ELSE %]
