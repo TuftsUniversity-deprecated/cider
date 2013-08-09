@@ -307,7 +307,6 @@ DROP TABLE IF EXISTS `user`;
 CREATE TABLE `user` (
   `id` integer NOT NULL auto_increment,
   `username` text NOT NULL,
-  `password` text NOT NULL,
   `staff` integer,
   INDEX `user_idx_staff` (`staff`),
   PRIMARY KEY (`id`),
