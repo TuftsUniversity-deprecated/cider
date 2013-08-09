@@ -50,6 +50,7 @@ requires 'FindBin::libs' => '1.63';
 requires 'HTML::FormHandler' => '0.40013';
 requires 'HTML::FormHandler::Model::DBIC' => '0.23';
 requires 'Try::Tiny' => '0.11';
+requires 'IO::Socket::SSL' => '1.81';
 test_requires 'Test::More' => '0.88';
 test_requires 'Test::Exception';
 catalyst;
