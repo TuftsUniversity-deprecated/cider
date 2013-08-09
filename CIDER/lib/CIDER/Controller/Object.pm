@@ -51,7 +51,101 @@ sub set_up_held_object :Private {
 
 }
 
-sub detail :Chained('object') :PathPart('') :Args(0) :Form {
+sub detail :Chained('object') :PathPart('') :Args(0) {
+    my ( $self, $c ) = @_;
+
+    my $object = $c->stash->{ object };
+    unless ( defined( $object ) ) {
+        $c->detach( $c->controller( 'Root' )->action_for( 'default' ) );
+    }
+
+    $c->forward( '_setup_export_templates' );
+
+    my $type = $object->type;
+
+    # number_of_descendants is used by the deletion-confirmation dialog.
+    $c->stash->{ number_of_descendants } = $object->object->raw_descendants->count - 1;
+
+    # Determine whether we're viewing this object in a set-results or search-results
+    # context, based on URI params, and store that info in the stash. The template
+    # needs it to know which flavor of next / prev buttons to display.
+    my $context = $c->req->params->{ context } || q{};
+    my $context_index = $c->req->params->{ context_index } || 0;
+    $c->stash->{ context } = $context;
+
+    # Dependent upon that context, define what the next/prev objects are.
+    my $next_object;
+    my $previous_object;
+    if ( $context eq 'search' ) {
+        my $search_query = $c->session->{ last_search_query };
+        my $search_result_size = $c->session->{ last_search_result_size };
+
+        my $hits = $c->model( 'Search' )->search(
+            query      => $search_query,
+            num_wanted => 3,
+            offset     => $context_index,
+        );
+        my $number_of_hits = $hits->total_hits;
+        if ( $context_index == 0 ) {
+            $hits->next;
+            my $next_hit = $hits->next;
+            if ( $next_hit ) {
+                $next_object
+                    = $c->model( 'CIDERDB::Object' )->find( $hits->next->{ id } );
+            }
+        }
+        elsif ( ( $context_index - 1 ) == $search_result_size ) {
+            $previous_object
+                = $c->model( 'CIDERDB::Object' )->find( $hits->next->{ id } );
+        }
+        else {
+            $previous_object
+                = $c->model( 'CIDERDB::Object' )->find( $hits->next->{ id } );
+            $hits->next;
+            $next_object
+                = $c->model( 'CIDERDB::Object' )->find( $hits->next->{ id } );
+        }
+    }
+    elsif ( $context eq 'set' ) {
+        my $set_id = $c->req->params->{ set_id };
+        my $set = $c->model( 'CIDERDB::ObjectSet' )->find( $set_id );
+        my $set_size = $set->count;
+
+        unless ( $context_index == 0 ) {
+            $previous_object = $set->objects->search(
+                {},
+                {
+                    rows   => 1,
+                    offset => $context_index - 1,
+                },
+            )->single;
+        }
+        unless ( ( $context_index - 1 ) == $set_size ) {
+            $next_object = $set->objects->search(
+                {},
+                {
+                    rows   => 1,
+                    offset => $context_index + 1,
+                }
+            )->single;
+        }
+
+        $c->stash->{ set_id } = $set_id;
+    }
+    else {
+        $next_object = $object->next_object;
+        $previous_object = $object->previous_object;
+    }
+
+    $c->stash->{ next_object }     = $next_object;
+    $c->stash->{ previous_object } = $previous_object;
+    $c->stash->{ context_index }   = $context_index;
+
+    $c->stash->{ template } = 'object/detail.tt';
+
+}
+
+sub edit :Chained('object') :PathPart('edit') :Args(0) :Form {
     my ( $self, $c ) = @_;
 
     my $object = $c->stash->{ object };

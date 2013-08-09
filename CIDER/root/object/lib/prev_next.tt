@@ -1,0 +1,29 @@
+[% PROCESS 'object/lib/context_args.tt' %]
+<div class="object-nextprev">
+
+[% IF next_object %]
+<p style="float: right;">
+[% context_args.context_index = context_args.context_index + 1 %]
+<a href="[% c.uri_for( c.controller( 'Object' ).action_for( 'detail' ),
+                       [ next_object.number ],
+                       context_args,
+                     )
+            %]">
+            Next [% IF context == 'set' %]in set [% ELSIF context == 'search' %]in search results [% END %] &rarr;</a>
+</p>
+[% END %]
+
+[% IF previous_object %]
+<p>
+[% context_args.context_index = context_args.context_index - 1 %]
+<a href="[% c.uri_for( c.controller( 'Object' ).action_for( 'detail' ),
+                       [ previous_object.number ],
+                       context_args,
+                     )
+            %]">
+            &larr; Previous [% IF context == 'set' %]in set [% ELSIF context == 'search' %]in search results [% END %]</a>
+</p>
+[% context_args.context_index = context_args.context_index + 1 %]
+[% END %]
+
+</div> <!-- .object-nextprev -->

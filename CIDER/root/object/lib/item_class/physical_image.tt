@@ -1,0 +1,15 @@
+<h3>Physical Image</h3>
+<table>
+<tr>
+[% IF class.dimensions %]
+<th>Dimensions</th>
+<td>[% class.dimensions %]</td>
+</tr>
+[% END %]
+[% IF class.rights %]
+<tr>
+<th>Rights</th>
+<td>[% class.rights %]</td>
+</tr>
+[% END %]
+</table>

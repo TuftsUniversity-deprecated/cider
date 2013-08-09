@@ -6,6 +6,7 @@ use warnings;
 use base 'DBIx::Class::Core';
 
 use Carp;
+use String::CamelCase qw(decamelize);
 
 =head1 NAME
 
@@ -145,6 +146,19 @@ sub name_and_note {
     my $self = shift;
 
     return $self->location->barcode;
+}
+
+# type: Returns a descriptive, plain-English string describing what type of class this
+#       is, based on a cleaned-up version of its Perl class name.
+sub type {
+    my $self = shift;
+
+    my $class = ref $self ;
+    my ( $type ) = $class =~ /::(\w+)$/;
+    $type = decamelize( $type );
+    $type =~ s/_/ /g;
+
+    return $type;
 }
 
 =head1 LICENSE

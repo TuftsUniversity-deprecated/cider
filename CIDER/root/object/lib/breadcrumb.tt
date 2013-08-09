@@ -1,0 +1,7 @@
+[% ancestors = object.ancestors %]
+<ul class="breadcrumb">
+  <li><a href="[% c.uri_for( c.controller('List').action_for('index') ) %]">Browse</a></li>
+[% FOREACH ancestor = ancestors %]
+  <li><span class="divider">&gt;</span><a href="[% c.uri_for( c.controller('Object').action_for('detail'), [ ancestor.number ] ) %]">[% ancestor.full_title %]</a></li>
+[% END %]
+</ul>

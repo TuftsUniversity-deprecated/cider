@@ -7,6 +7,8 @@ USE scalar;
 object_id = object.id;
 %]
 
+[% PROCESS 'object/lib/context_args.tt' %]
+
 [% # Classes hash: variable_name => display_name 
    # For display the item's class at the top of the detail page
 %]
@@ -35,7 +37,7 @@ object_id = object.id;
 [% END %]
 
 [%# Display the object's full title, hyperlinked to its CIDER detail page. %]
-<a href="[% c.uri_for( c.controller('Object').action_for('detail'), [ object.number ] ) %]">[% object.full_title %]</a>
+<a href="[% c.uri_for( c.controller('Object').action_for('detail'), [ object.number ], context_args ) %]">[% object.full_title %]</a>
 
 
 <span class="class-labels pull-right">

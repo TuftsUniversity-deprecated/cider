@@ -1,0 +1,9 @@
+<h3>File folder</h3>
+<table>
+[% IF class.notes %]
+<tr>
+<th>Notes</th>
+<td>[% class.notes %]</td>
+</tr>
+[% END %]
+</table>

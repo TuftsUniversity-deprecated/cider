@@ -215,6 +215,12 @@ sub init_schema {
         ]
     );
 
+    # Map of the test objects, when the test schema is initialized:
+    #
+    # n1(collection) ------ n3(series) ------ n4(item)
+    #                                   '---- n5(item)
+    # n2(collection)
+
     $schema->populate(
         'Object',
         [

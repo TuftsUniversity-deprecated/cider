@@ -1,0 +1,36 @@
+[% USE scalar %]
+
+[% IF object.scalar.personal_names.count
+      + object.scalar.corporate_names.count
+      + object.scalar.topic_terms.count
+      + object.scalar.geographic_terms.count
+      > 0
+%]
+
+<div id="object-subject_headings">
+<h2>Subject Headings</h2>
+
+[% INCLUDE object/lib/subject_heading_group.tt,
+           method = 'personal_names',
+           title = 'Personal Names',
+%]
+
+[% INCLUDE object/lib/subject_heading_group.tt,
+           method = 'corporate_names',
+           title = 'Corporate Names',
+%]
+
+[% INCLUDE object/lib/subject_heading_group.tt,
+           method = 'topic_terms',
+           title = 'Topic Terms',
+%]
+
+[% INCLUDE object/lib/subject_heading_group.tt,
+           method = 'geographic_terms',
+           title = 'Geographic Terms',
+%]
+
+
+</div> <!-- #object-subject_headings" -->
+
+[% END %]
