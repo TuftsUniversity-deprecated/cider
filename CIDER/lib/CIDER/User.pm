@@ -55,7 +55,10 @@ around 'new' => sub {
         # Force a refresh.
 
         $c->logout;
+        $c->persist_user;
+        $c->delete_session;
         $c->response->redirect( $c->uri_for( '/' ) );
+        return undef;
     }
 };
 
