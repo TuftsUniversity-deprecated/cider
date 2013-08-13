@@ -58,9 +58,10 @@
 -%]	  	  
      
 
-[%# Generates all the elements for a file or item. The <c0X> wrapper is generated in the body of the code -%]
-[% MACRO generate_item(object, type)
+[%# Generates all the elements for a file or item. The <c0X> wrapper for all items and subitems is generated here -%]
+[% MACRO generate_item(object, type, level)
       BLOCK;
+      "<c0$level level=\"$type\" id=\"$object.number\">";
         "<did>";
            "<unittitle>" _ HTML.escape(object.title) _ "</unittitle>";
 	   generate_unitdate(object);
@@ -70,15 +71,15 @@
 	       "<persname>$creator</persname>";
              END;
      	     "</origination>";
-           END;
+       END;
 	   "<physdesc label='Type:'>$type</physdesc>";
 	   FOR class IN object.classes;
 	     UNLESS class.result_class.match('DigitalObject');
 	       "<physloc type=\"location\" label='Location:'>$class.location</physloc>";
-             END;
-           END;
+         END;
+       END;
 	 "</did>";
-         IF object.digital_objects;
+     IF object.digital_objects;
 	   FOR digital_object IN object.digital_objects;
 	     "<daogrp>";
 	       "<daodesc><p>" _ HTML.escape(object.title) _ "</p></daodesc>";
@@ -91,9 +92,18 @@
 	       END;
 	     END;
             "</daogrp>";
-           END; 
-	END;
-      END;
+       END;     
+   
+       	 END;
+        IF object.number_of_children > 0;
+	       FOR subitem IN object.children;
+             generate_item(subitem, type, level+1);
+             
+           END;
+        END;
+        "</c0$level>";
+      END; 
+      
 -%]
 [%# Begin main EAD body -%]	   
 <ead xmlns="http://dca.tufts.edu/schema/ead" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://dca.lib.tufts.edu/schema/ead http://dca.lib.tufts.edu/schema/ead/ead.xsd">
@@ -236,7 +246,7 @@
 
    <dsc type="combined">
      
-   [% IF collection.number_of_children > 0 -%]
+ [% IF collection.number_of_children > 0 -%]
      [% FOR series IN collection.children -%]
        [% IF series.type == 'series' -%]
      <c01 level="series" id="[% series.number %]">
@@ -249,25 +259,19 @@
 		[% IF child.number_of_children > 0 -%]
 		  [% FOR item IN child.children -%]
 		  [% IF item.file_folders; type = "file"; ELSE; type = "item"; END; -%]
-		<c03 level="[% type %]" id="[% item.number %]">
-		  [% generate_item(item, type) %]
-	        </c03>
+		
+		  [% generate_item(item, type, 3) %]
+	        
                   [% END -%]
                 [% END -%]
               </c02>
 
            [% ELSIF child.type == 'item' -%]
 	     [% IF child.file_folders; type = "file"; ELSE; type = "item"; END; -%]
-	      <c02 level="[% type %]" id="[% child.number %]">
-	        [% generate_item(child, type) %]
-             [% IF child.number_of_children > 0 -%]
-	       [% FOR subitem IN child.children -%]
-		  <c03 level="item" id="[% subitem.number %]">
-		    [% generate_item(subitem) %]
-                  </c03>
-               [% END -%]
-             [% END -%]
-             </c02>
+	      
+	        [% generate_item(child, type, 2) %]
+            
+             
            [% END -%]
          [% END -%]
         [% END -%]
@@ -276,6 +280,7 @@
 
     [% END -%] [%# for each top-level child %]
   [% END -%] [%# if collection has children %]
+
 
     </dsc>
 
