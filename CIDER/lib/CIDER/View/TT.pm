@@ -10,6 +10,7 @@ __PACKAGE__->config(
     CATALYST_VAR => 'c',
     render_die => 1,
     WRAPPER => 'wrapper.tt',
+    RECURSION => 1,
 );
 
 =head1 NAME
