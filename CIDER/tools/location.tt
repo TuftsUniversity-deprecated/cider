@@ -1,0 +1,20 @@
+    <create>
+        <location locationID="[% obj.location %]">
+
+        <titles>
+            <title>[% obj.title | html %]</title>
+        </titles>
+
+        <collectionNumbers>
+            <number>[% obj.collection %]</number>
+        </collectionNumbers>
+
+        <seriesNumbers>
+            <number>[% obj.series %]</number>
+        </seriesNumbers>
+
+        <unitType>[% obj.extent %]</unitType>
+
+        </location>
+
+    </create>
