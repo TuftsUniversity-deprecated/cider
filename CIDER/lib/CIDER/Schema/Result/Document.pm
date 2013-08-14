@@ -38,6 +38,8 @@ __PACKAGE__->add_columns(
         { data_type => 'varchar', is_nullable => 1 },
     rights =>
         { data_type => 'text', is_nullable => 1 },
+    notes =>
+        { data_type => 'text', is_nullable => 1 },
 );
 
 =head2 update_from_xml( $element )

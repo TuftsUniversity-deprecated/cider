@@ -609,7 +609,9 @@ elements:
                 - type: Textarea
                   name: rights
                   label: Rights
-
+                - type: Textarea
+                  name: notes
+                  label: Notes
     - type: Fieldset
       elements:
         - type: Block
@@ -658,6 +660,9 @@ elements:
                 - type: Textarea
                   name: rights
                   label: Rights
+                - type: Textarea
+                  name: notes
+                  label: Notes
 
     - type: Fieldset
       elements:
