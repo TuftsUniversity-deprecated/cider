@@ -451,6 +451,7 @@ CREATE TABLE `item` (
   `issue` text,
   `abstract` text,
   `citation` text,
+  `embargo_end_date` varchar(10),
   INDEX `item_idx_dc_type` (`dc_type`),
   INDEX `item_idx_restrictions` (`restrictions`),
   INDEX (`id`),

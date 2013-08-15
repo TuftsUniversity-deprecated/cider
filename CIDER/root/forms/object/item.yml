@@ -111,6 +111,10 @@ elements:
         attributes:
           order_by: id
 
+    - name: embargo_end_date
+      label: Embargo End Date
+      constraint: *Date
+
     - name: accession_number
       label: Accession Number
       attributes:
