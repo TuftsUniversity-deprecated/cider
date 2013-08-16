@@ -12,4 +12,10 @@
 <td>[% class.rights %]</td>
 </tr>
 [% END %]
+[% IF class.notes %]
+<tr>
+<th>Notes</th>
+<td>[% class.notes %]</td>
+</tr>
+[% END %]
 </table>
