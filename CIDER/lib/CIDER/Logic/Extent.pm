@@ -1,19 +1,29 @@
 package CIDER::Logic::Extent;
 
 use Moose;
+use Moose::Util::TypeConstraints;
+
+subtype 'VolumeNum',
+    as    'Num',
+    where { if ( $_ ) { /\.\d\d$/ } else { 1 } };
+
+coerce 'VolumeNum',
+    from 'Num',
+    via  { sprintf '%.2f', $_ if $_ };
 
 has volume => (
-    is => 'ro',
-    isa => 'Num',
+    is     => 'ro',
+    isa    => 'VolumeNum',
+    coerce => 1,
 );
 
 has types => (
-    is => 'ro',
+    is  => 'ro',
     isa => 'ArrayRef[CIDER::Schema::Result::UnitType]',
 );
 
 has counts => (
-    is => 'ro',
+    is  => 'ro',
     isa => 'HashRef[Int]',
 );
 
