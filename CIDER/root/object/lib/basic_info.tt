@@ -86,4 +86,10 @@ END;
 <td>[% object.issue %]</td>
 </tr>
 [% END %]
+[% IF object.embargo_end_date %]
+<tr>
+<th>Embargo End Date</th>
+<td>[% object.embargo_end_date %]</td>
+</tr>
+[% END %]
 </table>
