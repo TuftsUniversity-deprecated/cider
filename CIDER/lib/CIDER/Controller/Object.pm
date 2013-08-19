@@ -190,6 +190,8 @@ sub edit :Chained('object') :PathPart('edit') :Args(0) :Form {
             }
         }
 
+        $c->flash->{we_just_edited_this} = 1;
+
         $c->response->redirect(
             $c->uri_for( $self->action_for( 'detail' ), [ $object->number ] )
         );
