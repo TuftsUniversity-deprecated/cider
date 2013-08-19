@@ -337,6 +337,11 @@ sub update_parent {
                                  . $parent->id ) };
 
     # Set the parent's date_from to the earliest date_from among its children.
+    # (If the parent is an item and its date_from is earlier, never mind.)
+    if ( $parent->type eq 'item' ) {
+        push @siblings_date_from, $parent->date_from;
+        push @siblings_date_to,   $parent->date_to;
+    }
     my $earliest_date = minstr( @siblings_date_from );
     if ( $earliest_date ) {
         if ( not( $parent->date_from ) || ( $parent->date_from ne $earliest_date ) ) {
@@ -350,6 +355,7 @@ sub update_parent {
     }
 
     # Set the parent's date_to to the latest date_to among its children.
+    # (If the parent is an item and its date_to is later, never mind.)
     my $latest_date = maxstr( @siblings_date_to );
     if ( $latest_date ) {
         if ( not($parent->date_to) || ( $parent->date_to ne $latest_date ) ) {

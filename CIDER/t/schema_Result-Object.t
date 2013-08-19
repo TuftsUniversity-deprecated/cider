@@ -203,12 +203,31 @@ $series->discard_changes;
 is ( $series->date_to, '2002-01-01',
                        'Parent object with date_to-less children does the right thing.');
 
-
 $newer_item->delete;
 $older_item->delete;
 $series->discard_changes;
 is ( $series->date_from, undef, 'Childless parent object removed its date_from.');
 is ( $series->date_to, undef, 'Childless parent object removed its date_to.');
+
+# Test exceptional date-derivation behavior for items, first resetting the DB.
+$schema = CIDERTest->init_schema;
+$older_item = $schema->resultset( 'Item' )->find( 4 );
+my $subitem = $schema->resultset( 'Object' )->create( {
+                                                id => 6,
+                                                number => 'n5.1',
+                                                title => 'A subitem',
+                                                audit_trail => 1,
+                                                parent => $older_item->id,
+                                                date_from => '1900',
+                                                date_to   => '1901',
+                                            } );
+$older_item->discard_changes;
+is ( $older_item->date_from, '1900',
+     'The parent item rolled its own from_date back to match an older subitem.'
+);
+is ( $older_item->date_to,   '2008-01-01',
+     'The parent item maintained its to_date despite an older subitem.'
+);
 
 #########################
 # Testing next/prev stuff
@@ -243,4 +262,5 @@ is ( $item->next_object->previous_object->id, '4',
     'Item5 knows its previous object.' );
 is ( $item->next_object->next_object->previous_object->id, '5',
     'Item6 knows its next object (investigating its ancestors).' );
+
 done_testing;
