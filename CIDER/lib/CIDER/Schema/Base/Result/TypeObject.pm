@@ -20,14 +20,15 @@ Series, and Item.
 =cut
 
 
-my @proxy_fields = qw( parent number title date_from date_to restriction_summary
-                       objects sets audit_trail accession_numbers
+my @proxy_fields = qw( parent number title restriction_summary
+                       objects sets audit_trail accession_numbers parent_path
+                       date_from date_to
                      );
 
 my @proxy_methods = qw( children number_of_children
                         ancestors has_ancestor descendants item_descendants
-                        export update_parent dates full_title children_sketch
-                        previous_object next_object
+                        export dates full_title children_sketch
+                        previous_object next_object _date_from _date_to
                       );
 
 sub setup_object {

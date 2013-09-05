@@ -6,6 +6,7 @@ use warnings;
 use base 'CIDER::Schema::Base::Result::TypeObject';
 
 use String::CamelCase qw( camelize decamelize );
+use Class::Method::Modifiers qw( before after around );
 
 =head1 NAME
 
@@ -59,7 +60,16 @@ __PACKAGE__->add_columns(
 __PACKAGE__->add_columns(
     dc_type =>
         { data_type => 'tinyint', is_foreign_key => 1 },
+    item_date_from =>
+        { data_type => 'varchar', size => 10,
+          is_nullable => 1,
+        },
+    item_date_to =>
+        { data_type => 'varchar', size => 10,
+          is_nullable => 1,
+        },
 );
+
 __PACKAGE__->belongs_to(
     dc_type =>
         'CIDER::Schema::Result::DCType',
@@ -447,6 +457,114 @@ sub accession_numbers {
     my $self = shift;
     return $self->accession_number( @_ );
 }
+
+after [ qw( insert delete ) ] => sub {
+    my $self = shift;
+
+    $self->_update_derived_fields_of_my_ancestors;
+};
+
+around 'update' => sub {
+    my $original_method = shift;
+    my $self = shift;
+
+    my $i_had_dirty_columns;
+    if ( $self->get_dirty_columns ) {
+        $i_had_dirty_columns = 1;
+    }
+
+    my $return_value = $self->$original_method( @_ );
+
+    if ( $i_had_dirty_columns ) {
+        $self->_update_derived_fields_of_my_ancestors;
+    }
+};
+
+sub _update_derived_fields_of_my_ancestors {
+    my $self = shift;
+
+    my $dbh = $self->result_source->schema->storage->dbh;
+    my $date_range_sth = $dbh->prepare(
+        q{select min(item_date_from) as earliest_date, }
+        . q{max(item_date_to) as latest_date }
+        . q{from item where id in }
+        . q{(select id from object where parent_path like ?)} );
+
+    my $restriction_sth = $dbh->prepare(
+        q{select name from item, object, item_restrictions }
+        . q{where item.id = object.id and item.restrictions = item_restrictions.id }
+        . q{and parent_path like ?} );
+
+    my $accession_sth = $dbh->prepare(
+        q{select distinct accession_number from item, object }
+        . q{where item.id = object.id and parent_path like ?} );
+
+    my @objects_to_update = $self->ancestors;
+    if ( $self->in_storage ) {
+        push @objects_to_update, $self;
+    }
+    for my $ancestor ( @objects_to_update ) {
+        my $bind_value = $ancestor->parent_path . '%';
+        foreach ( $date_range_sth, $restriction_sth, $accession_sth ) {
+            $_->execute( $bind_value );
+        }
+        my ( $earliest_date, $latest_date ) = $date_range_sth->fetchrow_array;
+
+        $ancestor->_date_from( $earliest_date );
+        $ancestor->_date_to( $latest_date );
+
+        my %seen_accession_numbers;
+        my $accession_rows_ref = $accession_sth->fetchall_arrayref;
+        for my $row_ref ( @$accession_rows_ref ) {
+            if ( defined $row_ref->[0] ) {
+                for my $number ( split /\s*[,;]\s*/, $row_ref->[0] ) {
+                    $seen_accession_numbers{ $number } = 1;
+                }
+            }
+        }
+        my $accession_list = join '; ', keys %seen_accession_numbers;
+        $ancestor->accession_numbers( $accession_list );
+
+        my $row_count = 0;
+        my $restrictions_seen = 0;
+        my $restriction_summary = 'none';
+        while ( my $row_ref = $restriction_sth->fetchrow_arrayref ) {
+            if ( $row_ref->[0] ne 'none' ) {
+                $restrictions_seen++;
+            }
+            $row_count++;
+        }
+        if ( $restrictions_seen > 0 ) {
+            if ( $restrictions_seen == $row_count ) {
+                $restriction_summary = 'all';
+            }
+            else {
+                $restriction_summary = 'some';
+            }
+        }
+        $ancestor->restriction_summary( $restriction_summary );
+
+        $ancestor->update;
+    }
+}
+
+for my $date_method ( qw( date_from date_to ) ) {
+    around $date_method => sub {
+        my $original_method = shift;
+        my $self = shift;
+
+        if ( @_ ) {
+            my $item_method = "item_$date_method";
+#            die "yaaahaha with $self and $item_method";
+            return $self->$item_method( @_ );
+        }
+        else {
+            my $object_method = "_$date_method";
+            return $self->$object_method;
+        }
+    };
+}
+
 
 =head1 LICENSE
 
