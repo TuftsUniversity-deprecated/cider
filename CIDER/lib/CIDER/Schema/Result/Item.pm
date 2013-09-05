@@ -499,7 +499,7 @@ sub _update_derived_fields_of_my_ancestors {
         q{select distinct accession_number from item, object }
         . q{where item.id = object.id and parent_path like ?} );
 
-    my @objects_to_update = $self->ancestors;
+    my @objects_to_update = grep { defined } $self->ancestors;
     if ( $self->in_storage ) {
         push @objects_to_update, $self;
     }
