@@ -501,7 +501,7 @@ sub _update_derived_fields_of_my_ancestors {
 
     my @objects_to_update = grep { defined } $self->ancestors;
     if ( $self->in_storage ) {
-        push @objects_to_update, $self;
+        push @objects_to_update, $self->object;
     }
     for my $ancestor ( @objects_to_update ) {
         my $bind_value = $ancestor->parent_path . '%';
