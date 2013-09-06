@@ -247,35 +247,8 @@ sub insert {
 
     $self->dc_type( undef ) unless defined $self->dc_type;
 
-    $self->define_restriction_summary;
-
     return $self->next::method( @_ );
 }
-
-sub update {
-    my $self = shift;
-
-    $self->define_restriction_summary;
-
-    return $self->next::method( @_ );
-}
-
-sub define_restriction_summary {
-    my $self = shift;
-
-    if ( $self->restrictions ) {
-        if ( $self->restrictions->name eq 'none' ) {
-            $self->restriction_summary( 'none' );
-        }
-        else {
-            $self->restriction_summary( 'all' );
-        }
-    }
-    else {
-#        $self->restriction_summary( 'none' );
-    }
-}
-
 
 =head2 store_column( $column, $value )
 
@@ -508,9 +481,10 @@ sub _update_derived_fields_of_my_ancestors {
 
     my @objects_to_update = grep { defined } $self->ancestors;
     if ( $self->in_storage ) {
-        push @objects_to_update, $self->object;
+        push @objects_to_update, $self;
     }
     for my $ancestor ( @objects_to_update ) {
+        $ancestor = $ancestor->object;
         my $bind_value = $ancestor->parent_path . '%';
         foreach ( $date_range_sth, $restriction_sth, $accession_sth ) {
             $_->execute( $bind_value );
