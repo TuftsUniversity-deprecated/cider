@@ -458,12 +458,16 @@ sub accession_numbers {
     return $self->accession_number( @_ );
 }
 
+# On adding or removing this record, update all possibly-affected derived fields on
+# ancestor records.
 after [ qw( insert delete ) ] => sub {
     my $self = shift;
 
     $self->_update_derived_fields_of_my_ancestors;
 };
 
+# On changing this record, update all possibly-affected derived fields on
+# ancestor records.
 around 'update' => sub {
     my $original_method = shift;
     my $self = shift;
@@ -480,6 +484,9 @@ around 'update' => sub {
     }
 };
 
+# _update_derived_fields_of_my_ancesors: For the object record of this item and all its
+# ancestors, recalculate various derived fields, and then update those records.
+# Skips this item's own object record if this item no longer exists in the DB.
 sub _update_derived_fields_of_my_ancestors {
     my $self = shift;
 
@@ -548,6 +555,9 @@ sub _update_derived_fields_of_my_ancestors {
     }
 }
 
+# Modify calls to "date_from" and "date_to" to call either the item-specific date
+# accessors (if called as a setter) or the related object record's derived field
+# (if called as a getter).
 for my $date_method ( qw( date_from date_to ) ) {
     around $date_method => sub {
         my $original_method = shift;
@@ -555,7 +565,6 @@ for my $date_method ( qw( date_from date_to ) ) {
 
         if ( @_ ) {
             my $item_method = "item_$date_method";
-#            die "yaaahaha with $self and $item_method";
             return $self->$item_method( @_ );
         }
         else {

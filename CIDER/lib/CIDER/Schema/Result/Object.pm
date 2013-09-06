@@ -532,6 +532,9 @@ sub siblings {
     );
 }
 
+# Override date_from and date_to to call their item-specific counterparts, if we have
+# an associated item, and this is called as a setter. Attempting to set the dates on
+# any other kind of type-object results in an error.
 sub date_from {
     my $self = shift;
 
@@ -562,6 +565,8 @@ sub date_to {
     return $self->_date_to;
 }
 
+# If an update caused values to change on an associated item,
+# go ahead and update that item too.
 after 'update' => sub {
     my $self = shift;
     if ( my $item = $self->item ) {
