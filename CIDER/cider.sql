@@ -451,6 +451,8 @@ CREATE TABLE `item` (
   `issue` text,
   `abstract` text,
   `citation` text,
+  `item_date_from` varchar(10) DEFAULT NULL,
+  `item_date_to` varchar(10) DEFAULT NULL,
   INDEX `item_idx_dc_type` (`dc_type`),
   INDEX `item_idx_restrictions` (`restrictions`),
   INDEX (`id`),
