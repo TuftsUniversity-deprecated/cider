@@ -56,7 +56,7 @@
             <rel:isMemberOfCollection rdf:resource="info:fedora/tufts:UA069.006.DO.RCR"/>
             <!-- INSERT RELATIONSHIPS TO OTHER RCRS HERE-->
              [% FOR rels IN rc.record_context_relationships -%]
-    <rel:[% rels.type %] rdf:resource="info:fedora/tufts:[% FOR relrc IN rels.related_entity %][% relrc.record_id %]"/>
+    <rcr:[% rels.type %] rdf:resource="info:fedora/tufts:[% FOR relrc IN rels.related_entity %][% relrc.record_id %]"/>
     [% END -%]
   [% END -%]
                      
