@@ -124,7 +124,28 @@
      [% CASE 'Text' -%]
       [% content_model = 'Text.PDF' %]
       <datastream ID="Archival.pdf" xlink:href="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no %]/archival_pdf/[% matches.0 %].archival.pdf" xlink:title="[% object.title.replace('"', '&quot;') %]"/>
-     [% CASE DEFAULT -%]
+     [% CASE 'Sound' -%]
+	    [% FOR digital_object IN object.digital_objects -%]
+         [% IF digital_object.format == 'text/xml' -%]
+           [% audio_with_transcript = 'true' %]
+	     [% ELSE -%]
+           [% audio_with_transcript = 'false' %]
+	     [% END -%]
+	    [% END -%]
+        [% IF audio_with_transcript == 'true' -%]
+          [% content_model ='Audio.OralHistory' %]
+          <datastream ID="ACCESS_MP3" xlink:href="http://bucket01.lib.tufts.edu/data01/tufts/central/dca/[% coll_no %]/access_mp3/[% matches.0 %].mp3"/>
+          <!-- Make sure this is correct for the file type of the archival sound. -->
+          <datastream ID="ARCHIVAL_WAV" xlink:href="http://bucket01.lib.tufts.edu/data01/tufts/central/dca/[% coll_no %]/archival_wav/[% matches.0 %].wav"/>
+          <!-- Make sure this is correct for the file extension of the archival tei. -->
+          <datastream ID="ARCHIVAL_XML" xlink:href="http://bucket01.lib.tufts.edu/data01/tufts/central/dca/[% coll_no %]/archival_xml/[% matches.0 %].xml"/>
+	    [% ELSE -%]
+          [% content_model ='Audio' %]
+          <datastream ID="ACCESS_MP3" xlink:href="http://bucket01.lib.tufts.edu/data01/tufts/central/dca/[% coll_no %]/access_mp3/[% matches.0 %].mp3"/>
+          <!-- Make sure this is correct for the file type of the archival sound. -->
+          <datastream ID="ARCHIVAL_WAV" xlink:href="http://bucket01.lib.tufts.edu/data01/tufts/central/dca/[% coll_no %]/archival_wav/[% matches.0 %].wav"/>
+	    [% END -%]
+    [% CASE DEFAULT -%]
      <!-- ERROR TYPE NOT FOUND -->
      [% END -%]
 
