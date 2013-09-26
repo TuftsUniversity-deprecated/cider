@@ -1,8 +1,21 @@
 [% c.res.content_type = 'application/xml' -%]
 [% USE date(format = '%Y-%m-%d') -%]
 [% FOR object IN objects -%]
-   <input OBJID="[% object.digital_objects.pid %]" LABEL="[% object.title.replace('"', '&quot;') %]" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.fedora.info/definitions/">
-
+   [%# If there are multiple digital object class instances, you
+       need to extract the PID to be the Fedora object ID. Otherwise
+       there is a PID at the top level of the group.  %]
+   [% IF object.digital_objects.pid %]
+       [% pid = object.digital_objects.pid %]
+   [% ELSE %]
+	  [% FOR digital_object IN object.digital_objects -%]
+        [% IF digital_object.pid  %]
+           [% pid = digital_object.pid %]
+           [% BREAK  %]
+        [% END %]
+           <!-- We should never reach here unless there is a problem with the PID -->
+      [% END %]
+   [% END %]
+   <input OBJID="[% pid %]" LABEL="[% object.title.replace('"', '&quot;') %]" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.fedora.info/definitions/">
      <metadata>
        <metadata ID="DC">
           <oai_dc:dc xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/">
@@ -18,9 +31,11 @@
 	    [% END -%]
 	    <dc:type>[% object.dc_type %]</dc:type>
 	    [% FOR digital_object IN object.digital_objects -%]
-	    [% IF digital_object.format -%]
+	      [% IF digital_object.format -%]
+        <!-- If there are multiple digital object class instances, verify that this is the right format. -->
 	    <dc:format>[% digital_object.format %]</dc:format>
-	    [% END -%]
+	         [% BREAK -%]
+	      [% END -%]
 	    [% END -%]
 	    [% matches = object.number.match('(\w{5})') %]
 	    [% coll_no = matches.0 %]
@@ -78,18 +93,22 @@
 	    <dc:publisher>Digital Collections and Archives, Tufts University</dc:publisher>	     
 	    <dc:rights>http://dca.tufts.edu/ua/access/rights.html</dc:rights>
 	    [% FOR digital_object IN object.digital_objects -%]
-	    [% IF digital_object.permanent_url -%]
+	      [% IF digital_object.permanent_url -%]
+        <!-- If there are multiple digital object class instances, verify that this is the right handle. -->
 	    <dc:identifier>[% object.permanent_url %]</dc:identifier>
-	    [% ELSE -%]
+	        [% BREAK -%]
+	      [% ELSE -%]
 	    <dc:identifier>PUTHANDLEHERE</dc:identifier>
-	    [% END -%]
+	      [% END -%]
 	    [% END -%]
 	    <dc:type>[% object.dc_type %]</dc:type>	       
 
 	    [% FOR digital_object IN object.digital_objects -%]
-	    [% IF digital_object.format -%]
+	      [% IF digital_object.format -%]
+        <!-- If there are multiple digital object class instances, verify that this is the right format. -->
 	    <dc:format>[% digital_object.format.name.remove(' --.*')  %]</dc:format>
-	    [% END -%]
+	        [% BREAK -%]
+	      [% END -%]
 	    [% END -%]
 
 
@@ -111,7 +130,7 @@
 	  </dca_dc:dc>	    
 	</metadata>
      </metadata>
-     [% matches = digital_object.pid.match('tufts:(.*)') %]
+      [% matches = pid.match('tufts:(.*)') %]
 	   
      <datastreams>
 	 [% SWITCH object.dc_type -%]
@@ -126,24 +145,24 @@
       <datastream ID="Archival.pdf" xlink:href="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no %]/archival_pdf/[% matches.0 %].archival.pdf" xlink:title="[% object.title.replace('"', '&quot;') %]"/>
      [% CASE 'Sound' -%]
 	    [% FOR digital_object IN object.digital_objects -%]
+         [% audio_with_transcript = 'false' %]
          [% IF digital_object.format == 'text/xml' -%]
            [% audio_with_transcript = 'true' %]
-	     [% ELSE -%]
-           [% audio_with_transcript = 'false' %]
+           [% BREAK %]
 	     [% END -%]
 	    [% END -%]
         [% IF audio_with_transcript == 'true' -%]
           [% content_model ='Audio.OralHistory' %]
-          <datastream ID="ACCESS_MP3" xlink:href="http://bucket01.lib.tufts.edu/data01/tufts/central/dca/[% coll_no %]/access_mp3/[% matches.0 %].mp3"/>
+          <datastream ID="ACCESS_MP3" xlink:href="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no %]/access_mp3/[% matches.0 %].access.mp3"/>
           <!-- Make sure this is correct for the file type of the archival sound. -->
-          <datastream ID="ARCHIVAL_WAV" xlink:href="http://bucket01.lib.tufts.edu/data01/tufts/central/dca/[% coll_no %]/archival_wav/[% matches.0 %].wav"/>
+          <datastream ID="ARCHIVAL_WAV" xlink:href="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no %]/archival_wav/[% matches.0 %].archival.wav"/>
           <!-- Make sure this is correct for the file extension of the archival tei. -->
-          <datastream ID="ARCHIVAL_XML" xlink:href="http://bucket01.lib.tufts.edu/data01/tufts/central/dca/[% coll_no %]/archival_xml/[% matches.0 %].xml"/>
+          <datastream ID="ARCHIVAL_XML" xlink:href="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no %]/archival_xml/[% matches.0 %].archival.tei"/>
 	    [% ELSE -%]
           [% content_model ='Audio' %]
-          <datastream ID="ACCESS_MP3" xlink:href="http://bucket01.lib.tufts.edu/data01/tufts/central/dca/[% coll_no %]/access_mp3/[% matches.0 %].mp3"/>
+          <datastream ID="ACCESS_MP3" xlink:href="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no %]/access_mp3/[% matches.0 %].mp3"/>
           <!-- Make sure this is correct for the file type of the archival sound. -->
-          <datastream ID="ARCHIVAL_WAV" xlink:href="http://bucket01.lib.tufts.edu/data01/tufts/central/dca/[% coll_no %]/archival_wav/[% matches.0 %].wav"/>
+          <datastream ID="ARCHIVAL_WAV" xlink:href="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no %]/archival_wav/[% matches.0 %].wav"/>
 	    [% END -%]
     [% CASE DEFAULT -%]
      <!-- ERROR TYPE NOT FOUND -->
@@ -152,9 +171,9 @@
       <datastream ID="RELS-EXT" STATE="A" CONTROL_GROUP="X" VERSIONABLE="true">
         <xmlContent>
 	  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:rel="info:fedora/fedora-system:def/relations-external#">
-	    <rdf:Description rdf:about="info:fedora/[% digital_object.pid %]">
+	    <rdf:Description rdf:about="info:fedora/[% pid %]">
 	      <fedora-model:hasModel rdf:resource="info:fedora/cm:[% content_model %]" xmlns:fedora-model="info:fedora/fedora-system:def/model#"/>
-	      <itemID xmlns="http://www.openarchives.org/OAI/2.0/">oai:[% digital_object.pid %]</itemID>
+	      <itemID xmlns="http://www.openarchives.org/OAI/2.0/">oai:[% pid %]</itemID>
 	      [% FOR digital_object IN object.digital_objects -%]
 	      [% FOR relationship IN digital_object.digital_object_relationships -%]
 	      <[% relationship.predicate %] rdf:resource="info:fedora/[% relationship.pid %]" />
@@ -166,4 +185,6 @@
      </datastream>
    </datastreams>
   </input>
+  [%# Make sure there's always a newline after the final closing tag. %]
+
 [% END -%]
