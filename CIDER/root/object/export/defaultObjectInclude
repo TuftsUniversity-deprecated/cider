@@ -148,6 +148,10 @@
          [% audio_with_transcript = 'false' %]
          [% IF digital_object.format == 'text/xml' -%]
            [% audio_with_transcript = 'true' %]
+           [% transcript_extension = '.xml'  %]
+         [% ELSIF digital_object.format == 'text/tei+xml' -%]
+           [% audio_with_transcript = 'true' %]
+           [% transcript_extension = '.tei'  %]
 	     [% ELSE -%]
            [% extension = digital_object.file_extension %]
 	     [% END -%]
@@ -158,7 +162,7 @@
           <!-- Make sure this is correct for the file type of the archival sound. -->
           <datastream ID="ARCHIVAL_WAV" xlink:href="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no %]/archival_wav/[% matches.0 %].archival[% extension %]"/>
           <!-- Make sure this is correct for the file extension of the archival tei. -->
-          <datastream ID="ARCHIVAL_XML" xlink:href="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no %]/archival_xml/[% matches.0 %].archival.tei"/>
+          <datastream ID="ARCHIVAL_XML" xlink:href="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no %]/archival_xml/[% matches.0 %].archival[% transcript_extension %]"/>
 	    [% ELSE -%]
           [% content_model ='cm:Audio' %]
           <datastream ID="ACCESS_MP3" xlink:href="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no %]/access_mp3/[% matches.0 %].mp3"/>
@@ -170,6 +174,10 @@
          [% video_with_transcript = 'false' %]
          [% IF digital_object.format == 'text/xml' -%]
            [% video_with_transcript = 'true' %]
+           [% transcript_extension = '.xml'  %]
+         [% ELSIF digital_object.format == 'text/tei+xml' -%]
+           [% video_with_transcript = 'true' %]
+           [% transcript_extension = '.tei'  %]
 	     [% ELSE -%]
            [% extension = digital_object.file_extension %]
 	     [% END -%]
@@ -178,7 +186,7 @@
         [% IF video_with_transcript == 'true' -%]
           <datastream ID="ARCHIVAL_VIDEO" xlink:href="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no %]/archival_video/[% matches.0 %].archival[% extension %]"/>
           <!-- Make sure this is correct for the file extension of the archival tei. -->
-          <datastream ID="ARCHIVAL_XML" xlink:href="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no %]/archival_xml/[% matches.0 %].archival.tei"/>
+          <datastream ID="ARCHIVAL_XML" xlink:href="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no %]/archival_xml/[% matches.0 %].archival[% transcript_extension %]"/>
           <datastream ID="ACCESS_MP4" xlink:href="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no %]/access_mp4/[% matches.0 %].access.mp4"/>
           <datastream ID="ACCESS_WEBM" xlink:href="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no %]/access_webm/[% matches.0 %].access.webm"/>
           <datastream ID="Thumbnail.png" xlink:href="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no %]/thumb_png/[% matches.0 %].thumb.png"/>
