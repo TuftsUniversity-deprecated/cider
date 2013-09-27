@@ -71,10 +71,11 @@
 	    [% END %]
 	    [% END %]
 	    	    
-		[% IF object.circa OR object.description OR physImgSpec.length==0 %]
-	    <dc:description>[% IF object.circa %]This date is approximate. [% END %][%IF physImgSpec.length %][% physImgSpec %]. [% END %][% IF object.description %][% object.description %][% END %]
+	    [% IF object.abstract OR object.volume OR object.issue OR object.description OR object.circa OR physImgSpec.length==0 %]
+	    <dc:description>[% IF object.circa %]This date is approximate. [% END %][% IF object.volume %]Volume [% object.volume %][% END %][% IF object.volume AND object.issue %], [% END %][% IF object.issue %]Issue [% object.issue %][% END %][% IF object.volume AND object.issue %]. [% END %] [%IF physImgSpec.length %][% physImgSpec %].[% END %][% IF object.description %] [% object.description %][% END %][% IF object.abstract %] Abstract: [% object.abstract %][% END %]
 	    </dc:description>
 	    [% END -%]
+
 
 	    [% matches = object.number.match('(\w{5})') %]
 	    <dc:source>[% matches.0 %]</dc:source>
@@ -184,16 +185,16 @@
 	    [% END -%]
         [% content_model ='afmodel:TuftsVideo' %]
         [% IF video_with_transcript == 'true' -%]
-          <datastream ID="ARCHIVAL_VIDEO" xlink:href="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no %]/archival_video/[% matches.0 %].archival[% extension %]"/>
+          <datastream ID="Archival.video" xlink:href="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no %]/archival_video/[% matches.0 %].archival[% extension %]"/>
           <!-- Make sure this is correct for the file extension of the archival tei. -->
           <datastream ID="ARCHIVAL_XML" xlink:href="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no %]/archival_xml/[% matches.0 %].archival[% transcript_extension %]"/>
-          <datastream ID="ACCESS_MP4" xlink:href="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no %]/access_mp4/[% matches.0 %].access.mp4"/>
-          <datastream ID="ACCESS_WEBM" xlink:href="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no %]/access_webm/[% matches.0 %].access.webm"/>
+          <datastream ID="Access.mp4" xlink:href="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no %]/access_mp4/[% matches.0 %].access.mp4"/>
+          <datastream ID="Access.webm" xlink:href="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no %]/access_webm/[% matches.0 %].access.webm"/>
           <datastream ID="Thumbnail.png" xlink:href="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no %]/thumb_png/[% matches.0 %].thumb.png"/>
 	    [% ELSE -%]
-          <datastream ID="ARCHIVAL_VIDEO" xlink:href="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no %]/archival_video/[% matches.0 %][% extension %]"/>
-          <datastream ID="ACCESS_MP4" xlink:href="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no %]/access_mp4/[% matches.0 %].access.mp4"/>
-          <datastream ID="ACCESS_WEBM" xlink:href="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no %]/access_webm/[% matches.0 %].access.webm"/>
+          <datastream ID="Archival.video" xlink:href="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no %]/archival_video/[% matches.0 %][% extension %]"/>
+          <datastream ID="Access.mp4" xlink:href="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no %]/access_mp4/[% matches.0 %].access.mp4"/>
+          <datastream ID="Access.webm" xlink:href="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no %]/access_webm/[% matches.0 %].access.webm"/>
           <datastream ID="Thumbnail.png" xlink:href="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no %]/thumb_png/[% matches.0 %].thumb.png"/>
 	    [% END -%] [%# End of conditional comparing with and without transcript  %]
     [% CASE DEFAULT -%]
