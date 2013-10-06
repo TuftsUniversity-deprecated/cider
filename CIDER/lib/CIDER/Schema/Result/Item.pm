@@ -466,7 +466,8 @@ sub _update_derived_fields_of_my_ancestors {
     my $dbh = $self->result_source->schema->storage->dbh;
     my $date_range_sth = $dbh->prepare(
         q{select min(item_date_from) as earliest_date, }
-        . q{max(item_date_to) as latest_date }
+        . q{max(item_date_from) as latest_date_from, }
+        . q{max(item_date_to) as latest_date_to }
         . q{from item where id in }
         . q{(select id from object where parent_path like ?)} );
 
@@ -489,7 +490,16 @@ sub _update_derived_fields_of_my_ancestors {
         foreach ( $date_range_sth, $restriction_sth, $accession_sth ) {
             $_->execute( $bind_value );
         }
-        my ( $earliest_date, $latest_date ) = $date_range_sth->fetchrow_array;
+        my ( $earliest_date, $latest_date_from, $latest_date_to ) = $date_range_sth->fetchrow_array;
+        my $latest_date = undef;
+        if ( $latest_date_from || $latest_date_to ) {
+            if ( !$latest_date_to or $latest_date_from gt $latest_date_to ) {
+                $latest_date = $latest_date_from;
+            }
+            else {
+                $latest_date = $latest_date_to;
+            }
+        }
 
         $ancestor->_date_from( $earliest_date );
         $ancestor->_date_to( $latest_date );

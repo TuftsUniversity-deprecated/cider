@@ -197,6 +197,13 @@ $newer_item->discard_changes;
 $series->discard_changes;
 is ( $series->date_to, '2011-01-01', 'Parent object lowered its date-to ceiling.');
 
+$newer_item->date_to( undef );
+$newer_item->date_from( '2022-01-01' );
+$newer_item->update;
+$series->discard_changes;
+is ( $series->date_to, '2022-01-01', 'Parent object adjusted its date-to to cover a '
+                                     . 'child\'s futuristic date-from.' );
+
 #foreach ( $newer_item, $older_item ) {
 #    $_->date_to( undef );
 #    $_->update;
