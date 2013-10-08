@@ -111,6 +111,10 @@ elements:
         attributes:
           order_by: id
 
+    - name: embargo_end_date
+      label: Embargo End Date
+      constraint: *Date
+
     - name: accession_number
       label: Accession Number
       attributes:
@@ -609,7 +613,9 @@ elements:
                 - type: Textarea
                   name: rights
                   label: Rights
-
+                - type: Textarea
+                  name: notes
+                  label: Notes
     - type: Fieldset
       elements:
         - type: Block
@@ -658,6 +664,9 @@ elements:
                 - type: Textarea
                   name: rights
                   label: Rights
+                - type: Textarea
+                  name: notes
+                  label: Notes
 
     - type: Fieldset
       elements:

@@ -39,6 +39,10 @@ __PACKAGE__->add_columns(
         { data_type => 'boolean', default_value => 0 },
     is_group =>
         { data_type => 'boolean', default_value => 0 },
+    embargo_end_date =>
+        { data_type => 'varchar', size => 10,
+          is_nullable => 1,
+        },
 );
 
 __PACKAGE__->add_columns(

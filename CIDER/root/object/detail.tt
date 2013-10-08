@@ -6,6 +6,11 @@
 <a class="close" data-dismiss="alert" href="#">x</a>
 <p>You have successfully created a new [% object.type %] with the title <strong>[% object.title %]</strong>.</p>
 </div>
+[% ELSIF we_just_edited_this %]
+<div class="alert alert-success">
+<a class="close" data-dismiss="alert" href="#">x</a>
+<p>You have successfully made changes to this object.</p>
+</div>
 [% END %]
 
 [% INCLUDE object/lib/breadcrumb.tt %]
