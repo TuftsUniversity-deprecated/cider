@@ -192,7 +192,8 @@
           <datastream ID="Access.webm" xlink:href="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no %]/access_webm/[% matches.0 %].access.webm"/>
           <datastream ID="Thumbnail.png" xlink:href="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no %]/thumb_png/[% matches.0 %].thumb.png"/>
 	    [% ELSE -%]
-          <datastream ID="Archival.video" xlink:href="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no %]/archival_video/[% matches.0 %][% extension %]"/>
+          <datastream ID="Archival.video" xlink:href="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no %]/archival_video/[% matches.0 %].archival[% extension %]"/>
+          
           <datastream ID="Access.mp4" xlink:href="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no %]/access_mp4/[% matches.0 %].access.mp4"/>
           <datastream ID="Access.webm" xlink:href="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no %]/access_webm/[% matches.0 %].access.webm"/>
           <datastream ID="Thumbnail.png" xlink:href="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no %]/thumb_png/[% matches.0 %].thumb.png"/>
@@ -203,7 +204,7 @@
 
       <datastream ID="RELS-EXT" STATE="A" CONTROL_GROUP="X" VERSIONABLE="true">
         <xmlContent>
-	  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:rel="info:fedora/fedora-system:def/relations-external#">
+	  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:rel="info:fedora/fedora-system:def/relations-external#" xmlns:rcr="http://dca.lib.tufts.edu/ontology/rcr#">
 	    <rdf:Description rdf:about="info:fedora/[% pid %]">
 	      <fedora-model:hasModel rdf:resource="info:fedora/[% content_model %]" xmlns:fedora-model="info:fedora/fedora-system:def/model#"/>
 	      <itemID xmlns="http://www.openarchives.org/OAI/2.0/">oai:[% pid %]</itemID>
