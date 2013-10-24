@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use base 'DBIx::Class::Core';
-use Class::Method::Modifiers qw( around );
+use Class::Method::Modifiers qw( around after );
 use List::Util qw( minstr maxstr );
 use Carp qw( croak );
 
@@ -34,10 +34,12 @@ __PACKAGE__->add_columns(
     date_from =>
         { data_type => 'varchar', size => 10,
           is_nullable => 1,
+          accessor => '_date_from',
         },
     date_to =>
         { data_type => 'varchar', size => 10,
           is_nullable => 1,
+          accessor => '_date_to',
         },
     accession_numbers =>
         { data_type => 'text',
@@ -250,7 +252,6 @@ sub item_descendants {
 
 # Override the DBIC delete() method to work recursively on our related
 # objects, rather than relying on the database to do cascading delete.
-# Furthermore, call update_parent() to recalculate derived fields.
 sub delete {
     my $self = shift;
 
@@ -265,140 +266,7 @@ sub delete {
 
     $self->result_source->schema->indexer->remove( $self );
 
-    # Recursively recalculate ancestors' derived columns.
-    $self->update_parent;
-
     return $self;
-}
-
-# update: After performing the DB update, call update_parent(). This will update the
-#         parent object's derived fields.
-sub update {
-    my $self = shift;
-
-    my %dirty_columns = $self->get_dirty_columns;
-
-    $self->next::method( @_ );
-
-    # Recursively recalculate ancestors' derived columns.
-    if ( %dirty_columns ) {
-        $self->update_parent;
-    }
-
-    return $self;
-}
-
-# insert: After performing the DB update, call update_parent(). This will update the
-#         parent object's derived fields.
-sub insert {
-    my $self = shift;
-
-    $self->next::method( @_ );
-
-    # Recursively recalculate ancestors' derived columns.
-    $self->update_parent;
-
-    return $self;
-}
-
-# update_parent: Set the value of various derived fields on this object's parent object
-#                (if it has one). Calls update() at the end, which in turn calls this
-#                method again, thus allowing for updates to bubble up the object's
-#                lineage.
-sub update_parent {
-    my $self = shift;
-
-    my $parent = $self->parent;
-    return unless $parent;
-
-    my $dbh = $self->result_source->schema->storage->dbh;
-
-    my @siblings_date_from =
-        grep { defined }
-        @{ $dbh->selectcol_arrayref('select date_from from object where parent = '
-                                 . $parent->id ) };
-
-    my @siblings_date_to =
-        grep { defined }
-        @{ $dbh->selectcol_arrayref('select case when date_to is not null then date_to '
-                                 . 'when date_to is null then date_from end from '
-                                 . 'object where parent = '
-                                 . $parent->id ) };
-
-    my @siblings_accession_numbers =
-        grep { defined }
-        @{ $dbh->selectcol_arrayref('select distinct accession_numbers from object where '
-                                 . 'parent = '
-                                 . $parent->id ) };
-
-    my @siblings_restriction_summary =
-        @{ $dbh->selectcol_arrayref('select restriction_summary from object where '
-                                 . 'parent = '
-                                 . $parent->id ) };
-
-    # Set the parent's date_from to the earliest date_from among its children.
-    my $earliest_date = minstr( @siblings_date_from );
-    if ( $earliest_date ) {
-        if ( not( $parent->date_from ) || ( $parent->date_from ne $earliest_date ) ) {
-            $parent->date_from( $earliest_date );
-        }
-    }
-    else {
-        if ( defined $parent->date_from ) {
-            $parent->date_from( undef );
-        }
-    }
-
-    # Set the parent's date_to to the latest date_to among its children.
-    my $latest_date = maxstr( @siblings_date_to );
-    if ( $latest_date ) {
-        if ( not($parent->date_to) || ( $parent->date_to ne $latest_date ) ) {
-            $parent->date_to( $latest_date );
-        }
-    }
-    else {
-        if ( defined $parent->date_to ) {
-           $parent->date_to( undef );
-        }
-    }
-
-    # Set the parent's restrictions.
-    my $parent_restriction_summary;
-    my @none_restrictions =
-        grep { not(defined) || $_ eq 'none' } @siblings_restriction_summary;
-    my @all_restrictions =
-        grep { defined && $_ eq 'all' } @siblings_restriction_summary;
-
-    if ( @none_restrictions == @siblings_restriction_summary ) {
-        $parent_restriction_summary = 'none';
-    }
-    elsif ( @all_restrictions == @siblings_restriction_summary ) {
-        $parent_restriction_summary = 'all';
-    }
-    else {
-        $parent_restriction_summary = 'some';
-    }
-
-    if ( not( $parent->restriction_summary)
-         || ( $parent->restriction_summary ne $parent_restriction_summary ) ) {
-         $parent->restriction_summary( $parent_restriction_summary );
-    }
-
-    # Set the parent's accession-number list.
-    my $accession_numbers = ( join '; ', @siblings_accession_numbers );
-    if ( $accession_numbers
-         && ( not( $parent->accession_numbers )
-              || $parent->accession_numbers ne $accession_numbers
-            )
-        ) {
-        $parent->accession_numbers( $accession_numbers );
-    }
-
-    # Lock it in. (And, in so doing, bubble up to next ancestor, if there is one.)
-    if ( $parent->get_dirty_columns ) {
-        $parent->update;
-
-    }
 }
 
 sub export {
@@ -663,6 +531,50 @@ sub siblings {
         }
     );
 }
+
+# Override date_from and date_to to call their item-specific counterparts, if we have
+# an associated item, and this is called as a setter. Attempting to set the dates on
+# any other kind of type-object results in an error.
+sub date_from {
+    my $self = shift;
+
+    if ( @_ ) {
+        if ( my $item = $self->item ) {
+            $item->item_date_from( @_ );
+        }
+        else {
+            croak "You cannot set a from- or to-date on a non-item object.";
+        }
+    }
+
+    return $self->_date_from;
+}
+
+sub date_to {
+    my $self = shift;
+
+    if ( @_ ) {
+        if ( my $item = $self->item ) {
+            $item->item_date_to( @_ );
+        }
+        else {
+            croak "You cannot set a from- or to-date on a non-item object.";
+        }
+    }
+
+    return $self->_date_to;
+}
+
+# If an update caused values to change on an associated item,
+# go ahead and update that item too.
+after 'update' => sub {
+    my $self = shift;
+    if ( my $item = $self->item ) {
+        if ( $item->get_dirty_columns ) {
+            $item->update;
+        }
+    }
+};
 
 =head1 LICENSE
 

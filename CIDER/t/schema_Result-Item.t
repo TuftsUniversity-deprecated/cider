@@ -77,8 +77,8 @@ for my $subitem ( $item->children ) {
     is( $subitem->title, 'New sub-item', 'Title is correct.' );
     ok( $subitem->number, 'Number exists.' );
     ok( !$subitem->circa, 'Circa is false.' );
-    is( $subitem->date_from, '2000', 'Start date is correct.' );
-    is( $subitem->date_to, undef, 'End date is undefined.' );
+    is( $subitem->item_date_from, '2000', 'Start date is correct.' );
+    is( $subitem->item_date_to, undef, 'End date is undefined.' );
     is( $subitem->dc_type, 'Text', 'DC Type is correct.' );
 }
 
