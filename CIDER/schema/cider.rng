@@ -1131,6 +1131,7 @@
       <value>rel:isDerivationOf</value>
       <value>rel:hasAnnotation</value>
       <value>rel:hasEquivalent</value>
+      <value>rel:isPartOf</value>
     </choice>
   </define>
   <define name="restrictions">
