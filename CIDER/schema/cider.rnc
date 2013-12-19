@@ -124,17 +124,20 @@ group = element group {
 }
 
 fileFolder = element fileFolder {
+  attribute action { updateAction }?,
   element location { locationID },
   element notes { multiline? }?
 }
 
 container = element container {
+  attribute action { updateAction }?,
   element location { locationID },
   element format { format? }?,
   element notes { multiline? }?
 }
 
 boundVolume = element boundVolume {
+  attribute action { updateAction }?,
   element location { locationID },
   element format { format? }?,
   element notes { multiline? }?,
@@ -142,6 +145,7 @@ boundVolume = element boundVolume {
 }
 
 threeDimensionalObject = element threeDimensionalObject {
+  attribute action { updateAction }?,
   element location { locationID },
   element format { format? }?,
   element notes { multiline? }?,
@@ -149,6 +153,7 @@ threeDimensionalObject = element threeDimensionalObject {
 }
 
 audioVisualMedia = element audioVisualMedia {
+  attribute action { updateAction }?,
   element location { locationID },
   element format { format? }?,
   element notes { multiline? }?,
@@ -156,6 +161,7 @@ audioVisualMedia = element audioVisualMedia {
 }
 
 document = element document {
+  attribute action { updateAction }?,
   element location { locationID },
   element format { format? }?,
   element dimensions { line? }?,
@@ -163,6 +169,7 @@ document = element document {
 }
 
 physicalImage = element physicalImage {
+  attribute action { updateAction }?,
   element location { locationID },
   element format { format? }?,
   element dimensions { line? }?,
@@ -170,6 +177,7 @@ physicalImage = element physicalImage {
 }
 
 digitalObject = element digitalObject {
+  attribute action { updateAction }?,
   element location { locationID },
   element format { format? }?,
   element pid { pid },
@@ -201,6 +209,7 @@ digitalObject = element digitalObject {
 }
 
 browsingObject = element browsingObject {
+  attribute action { updateAction }?,
   element format { format? }?,
   element pid { pid? }?,
   element thumbnailPID { pid? }?,
@@ -310,6 +319,10 @@ relationshipPredicate =
 | "rel:isConstituentOf"
 | "rel:isSubsetOf"
 | "rel:isMemberOf"
+| "rel:hasDerivation"
+| "rel:isDerivationOf"
+| "rel:hasAnnotation"
+| "rel:hasEquivalent"
 
 restrictions =
   "none"
@@ -334,6 +347,9 @@ unitType =
 | "Audio-visual media"
 | "Digital objects"
 
+updateAction =
+  "update"
+| "create"
 
 # Datatypes
 # TO DO: constrain these with patterns?
