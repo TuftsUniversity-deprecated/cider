@@ -153,17 +153,19 @@
       <datastream ID="Basic.jpg" xlink:href="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no -%]/basic_jpg/[% matches.0 -%].basic.jpg" xlink:title="[% object.title.replace('"', '&quot;') -%]"/>
       <datastream ID="Thumbnail.png" xlink:href="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no -%]/thumb_png/[% matches.0 -%].thumb.png" xlink:title="[% object.title.replace('"', '&quot;') -%]"/>
      
-     [% CASE 'Text' -%]
+   [% CASE 'Text' -%]
       [% IF digital_object.format == 'application/msword' -%]
        <!-- If we are preserving the transfer version of the file but do not want it publicly accessible. -->
       [% content_model = 'cm:Text.PDF' -%]
       <datastream ID="transferClosed" xlink:href="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no -%]/transfer_closed/[% matches.0 -%].transfer[% digital_object.file_extension -%]" xlink:title="[% object.title.replace('"', '&quot;') -%]"/>
       <datastream ID="Archival.pdf" xlink:href="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no -%]/archival_pdf/[% matches.0 -%].archival.pdf" xlink:title="[% object.title.replace('"', '&quot;') -%]"/>
-      [% ELSIF digital_object.format == 'application/tei+xml' or 'text/xml' -%]
+     
+     [% ELSIF digital_object.format == 'application/tei+xml' or digital_object.format == 'text/xml' -%]
       <!-- For TEI documents. -->
       [% content_model = 'cm:Text.TEI' -%]
-      <datastream ID="ARCHIVAL_XML" xlink:href="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no -%]/archival_xml/[% matches.0 -%].archival[% digital_object.file_extension -%]" xlink:title="[% object.title.replace('"', '&quot;') -%]"/>
-      [% ELSE -%]
+      <datastream ID="ARCHIVAL_XML" xlink:href="htt p://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no -%]/archival_xml/[% matches.0 -%].archival[% digital_object.file_extension -%]" xlink:title="[% object.title.replace('"', '&quot;') -%]"/>
+     
+     [% ELSE -%]
       <!-- If we are presg ervinand making accessible only a pdf of the object. -->
       [% content_model = 'cm:Text.PDF' -%]
       <datastream ID="Archival.pdf" xlink:href="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no -%]/archival_pdf/[% matches.0 -%].archival.pdf" xlink:title="[% object.title.replace('"', '&quot;') -%]"/>
