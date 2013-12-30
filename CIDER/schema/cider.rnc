@@ -323,6 +323,7 @@ relationshipPredicate =
 | "rel:isDerivationOf"
 | "rel:hasAnnotation"
 | "rel:hasEquivalent"
+| "rel:isPartOf"
 
 restrictions =
   "none"
