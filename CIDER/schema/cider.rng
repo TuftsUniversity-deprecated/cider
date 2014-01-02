@@ -249,6 +249,13 @@
         </element>
       </optional>
       <optional>
+        <element name="embargoEndDate">
+          <optional>
+            <ref name="date"/>
+          </optional>
+        </element>
+      </optional>
+      <optional>
         <element name="accessionNumber">
           <optional>
             <ref name="accessionNumber"/>
@@ -717,6 +724,13 @@
           </optional>
         </element>
       </optional>
+      <optional>
+        <element name="notes">
+          <optional>
+            <ref name="multiline"/>
+          </optional>
+        </element>
+      </optional>
     </element>
   </define>
   <define name="physicalImage">
@@ -745,6 +759,13 @@
       </optional>
       <optional>
         <element name="rights">
+          <optional>
+            <ref name="multiline"/>
+          </optional>
+        </element>
+      </optional>
+      <optional>
+        <element name="notes">
           <optional>
             <ref name="multiline"/>
           </optional>
