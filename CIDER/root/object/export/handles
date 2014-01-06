@@ -4,8 +4,10 @@
 [% FOR object IN objects -%]
   <update>
     <item number="[% object.number %]" parent="[% object.parent.number %]">
+	<title>[% object.title -%]</title>
+    <restrictions>[% object.restrictions -%]</restrictions>
       <classes>
-        <digitalObject>
+        <digitalObject action ="update">
 	  <location>data05</location>
 	  <pid>tufts:[% object.number %]</pid>
 	  <permanentURL>PUTHANDLEHERE</permanentURL>
