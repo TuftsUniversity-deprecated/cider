@@ -66,14 +66,15 @@
     <foxml:datastreamVersion ID="DCA-ADMIN.0" LABEL="DCA Administrative Metadata" MIMETYPE="text/xml" >
       <foxml:contentDigest TYPE="MD5" />
       <foxml:xmlContent>
-      <dca_admin:admin xmlns:admin="http://nils.lib.tufts.edu/admin/" xmlns:local="http://nils.lib.tufts.edu/dcaadmin/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dca_admin="http://nils.lib.tufts.edu/dca_admin/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xlink="http://www.w3.org/TR/xlink">
-        <local:createdby>CIDER</local:createdby>
-        <local:steward>dca</local:steward>
-        <local:displays>dl</local:displays>
+      <admin xmlns="http://nils.lib.tufts.edu/dcaadmin/" xmlns:ac="http://purl.org/dc/dcmitype/">
+            <steward>dca</steward>
+            <displays>dl</displays>
+            <createdBy>CIDER</createdBy>
+           
         [% IF object.embargo_end_date -%]
-        <local:embargo>[% object.embargo_end_date -%]</local:embargo>
+        <embargo>[% object.embargo_end_date -%]</embargo>
         [% END -%]
-      </dca_admin:admin>
+      </admin>
       </foxml:xmlContent>
     </foxml:datastreamVersion>
     </foxml:datastream>
@@ -419,12 +420,11 @@
       <foxml:datastreamVersion ID="DCA-ADMIN.1" LABEL="DCA Administrative Metadata" MIMETYPE="text/xml" >
       <foxml:contentDigest TYPE="MD5" />
       <foxml:xmlContent>
-        <dca_admin:admin xmlns:admin="http://nils.lib.tufts.edu/admin/" xmlns:local="http://nils.lib.tufts.edu/dcaadmin/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dca_admin="http://nils.lib.tufts.edu/dca_admin/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xlink="http://www.w3.org/TR/xlink">
-                <local:steward>dca</local:steward>
-                <local:displays>dl</local:displays>
-                <local:createdby>CIDER</local:createdby>
-                <!-- ISO date of embargo end if embargo <local:embargo></local:embargo> -->
-        </dca_admin:admin>
+      <admin xmlns="http://nils.lib.tufts.edu/dcaadmin/" xmlns:ac="http://purl.org/dc/dcmitype/">
+            <steward>dca</steward>
+            <displays>dl</displays>
+            <createdBy>CIDER</createdBy>
+       </admin>
       </foxml:xmlContent>
     </foxml:datastreamVersion>
   </foxml:datastream>
@@ -515,11 +515,12 @@
       <foxml:datastreamVersion ID="DCA-ADMIN.1" LABEL="DCA Administrative Metadata" MIMETYPE="text/xml" >
       <foxml:contentDigest TYPE="MD5" />
       <foxml:xmlContent>
-        <ac xmlns:ac="http://purl.org/dc/dcmitype/" xmlns:local="http://nils.lib.tufts.edu/dcaadmin/" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.fedora.info/definitions/" version="0.1">
-                <local:steward>dca</local:steward>
-                <local:displays>dl</local:displays>
-                <local:createdby>CIDER</local:createdby>
-        </ac>
+        <admin xmlns="http://nils.lib.tufts.edu/dcaadmin/" xmlns:ac="http://purl.org/dc/dcmitype/">
+            <steward>dca</steward>
+            <displays>dl</displays>
+            <createdBy>CIDER</createdBy>
+           
+        </admin>
       </foxml:xmlContent>
     </foxml:datastreamVersion>
   </foxml:datastream>
