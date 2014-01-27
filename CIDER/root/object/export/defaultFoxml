@@ -1,0 +1,584 @@
+[% c.res.content_type = 'application/xml' -%]
+[% USE date(format = '%Y-%m-%d') -%]
+<?xml version="1.0" encoding="UTF-8"?>
+<input>
+[% FOR object IN objects-%]
+[% IF object.type == 'item' -%]
+[%# If there are multiple digital object class instances, you
+    need to extract the PID to be the Fedora object ID. Otherwise
+    there is a PID at the top level of the group. -%]
+  [% IF object.digital_objects.pid -%]
+    [% pid = object.digital_objects.pid -%]
+  [% ELSE -%]
+	 [% FOR digital_object IN object.digital_objects -%]
+    [% IF digital_object.pid -%]
+      [% pid = digital_object.pid -%]
+      [% BREAK -%]
+    [% END -%]
+      <!-- We should never reach here unless there is a problem with the PID -->
+   [% END -%]
+  [% END -%]
+  <foxml:digitalObject VERSION="1.1" PID="[% pid -%]" xmlns:foxml="info:fedora/fedora-system:def/foxml#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="info:fedora/fedora-system:def/foxml# http://www.fedora.info/definitions/1/0/foxml1-1.xsd">
+    <foxml:objectProperties>
+    <foxml:property NAME="info:fedora/fedora-system:def/model#state" VALUE="Active"/>
+    <foxml:property NAME="info:fedora/fedora-system:def/model#label" VALUE="[% object.title.replace('"', '&quot;') -%]"/>
+    <foxml:property NAME="info:fedora/fedora-system:def/model#ownerId" VALUE=""/>
+    <foxml:property NAME="info:fedora/fedora-system:def/model#createdDate" VALUE=""/>
+    <foxml:property NAME="info:fedora/fedora-system:def/view#lastModifiedDate" VALUE=""/>
+    </foxml:objectProperties>
+    
+    <foxml:datastream ID="DC" STATE="A" CONTROL_GROUP="X" VERSIONABLE="true">
+    <foxml:datastreamVersion ID="DC.1" LABEL="Dublin Core Metadata" MIMETYPE="text/xml" FORMAT_URI="http://www.openarchives.org/OAI/2.0/oai_dc/" >
+    <foxml:contentDigest TYPE="MD5" />
+    <foxml:xmlContent>
+       <oai_dc:dc xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.fedora.info/definitions/">
+
+      <dc:title>[% object.title -%]</dc:title>
+      [% FOR creator IN object.item_creators -%]
+ 	    <dc:creator>[% creator.name -%]</dc:creator>
+	    [% END -%]  
+	  <dc:date>[% object.audit_trail.date_created -%]</dc:date>
+	  [% IF object.date_from -%]
+	  <dc:date>[% object.date_from -%]</dc:date>
+	  [% END -%]
+	  <dc:type>[% object.dc_type -%]</dc:type>
+	  [% FOR digital_object IN object.digital_objects -%]
+	   [% IF digital_object.format -%]
+    <!-- If there are multiple digital object class instances, verify that this is the right format. -->
+	  <dc:format>[% digital_object.format -%]</dc:format>
+	     [% BREAK -%]
+	   [% END -%]
+	  [% END -%]
+	  [% matches = object.number.match('(\w{5})') -%]
+	  [% coll_no = matches.0 -%]
+	  <dc:source>[% coll_no -%]</dc:source>
+	  [% IF digital_object.rights -%]
+	  <dc:rights>[% digital_object.rights -%]</dc:rights>
+	  [% ELSE -%]
+	  <dc:rights>http://dca.tufts.edu/ua/access/rights.html<!-- CHANGE RIGHTS URL --></dc:rights>
+	  [% END -%]
+	  </oai_dc:dc>
+    </foxml:xmlContent>
+    </foxml:datastreamVersion>
+    </foxml:datastream>
+    
+    <foxml:datastream ID="DCA-ADMIN" STATE="A" CONTROL_GROUP="X" VERSIONABLE="true">
+    <foxml:datastreamVersion ID="DCA-ADMIN.0" LABEL="DCA Administrative Metadata" MIMETYPE="text/xml" >
+      <foxml:contentDigest TYPE="MD5" />
+      <foxml:xmlContent>
+      <dca_admin:admin xmlns:admin="http://nils.lib.tufts.edu/admin/" xmlns:local="http://nils.lib.tufts.edu/dcaadmin/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dca_admin="http://nils.lib.tufts.edu/dca_admin/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xlink="http://www.w3.org/TR/xlink">
+        <local:createdby>CIDER</local:createdby>
+        <local:steward>dca</local:steward>
+        <local:displays>dl</local:displays>
+        [% IF object.embargo_end_date -%]
+        <local:embargo>[% object.embargo_end_date -%]</local:embargo>
+        [% END -%]
+      </dca_admin:admin>
+      </foxml:xmlContent>
+    </foxml:datastreamVersion>
+    </foxml:datastream>
+    <foxml:datastream ID="DCA-META" STATE="A" CONTROL_GROUP="X" VERSIONABLE="true">
+    <foxml:datastreamVersion ID="DCA-META.1" LABEL="DCA Descriptive Metadata" MIMETYPE="text/xml" >
+      <foxml:contentDigest TYPE="MD5" />
+      <foxml:xmlContent>
+      <dca_dc:dc xmlns:dca_dc="http://nils.lib.tufts.edu/dca_dc/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcatech="http://nils.lib.tufts.edu/dcatech/" xmlns:dcadesc="http://nils.lib.tufts.edu/dcadesc/">
+        <dc:title>[% object.title -%]</dc:title>
+        [% FOR creator IN object.item_creators -%]
+        <dc:creator>[% creator.name -%]</dc:creator>
+        [% END -%]
+        [% USE physImgSpec=String('') -%]
+        [% FOR physical_image IN object.physical_images -%]
+        [% IF physical_image.dimensions -%]
+    	  [% CALL physImgSpec.append(physical_image.dimensions,', ') -%]
+    	  [% END -%]
+    	  [% IF physical_image.format -%]
+    	  [% CALL physImgSpec.append(physical_image.format) -%]
+    	  [% END -%]
+    	  [% END -%]
+	  	  [% IF object.abstract OR object.volume OR object.issue OR object.description OR object.circa OR physImgSpec.length==0 -%]
+	      <dc:description>[% IF object.circa -%]This date is approximate. [% END -%][% IF object.volume -%]Volume [% object.volume -%][% END -%][% IF object.volume AND object.issue -%], [% END -%][% IF object.issue -%]Issue [% object.issue -%][% END -%][% IF object.volume AND object.issue -%]. [% END -%] [%IF physImgSpec.length -%][% physImgSpec -%].[% END -%][% IF object.description -%] [% object.description -%][% END -%][% IF object.abstract -%] Abstract: [% object.abstract -%][% END -%]
+	      </dc:description>
+	      [% END -%]
+      	  [% matches = object.number.match('(\w{5})') -%]
+      	  <dc:source>[% matches.0 -%]</dc:source>      
+      	  [% IF object.date_from -%]
+      	  <dc:date.created>[% object.date_from -%]</dc:date.created>
+      	  [% END -%]      
+      	  <dc:date.available>[% object.audit_trail.date_created -%]</dc:date.available>
+      	  <dc:date.issued>[% date.format -%]</dc:date.issued>
+      	  [% IF object.citation -%]
+      	  <dc:bibliographicCitation>[% object.citation -%]</dc:bibliographicCitation>
+      	  [% END -%]
+      	  <dc:publisher>Tufts University. Digital Collections and Archives.</dc:publisher>	   
+      	  [% IF digital_object.rights -%]
+	      <dc:rights>[% digital_object.rights -%]</dc:rights>
+      	  [% ELSE -%]
+      	  <dc:rights>http://dca.tufts.edu/ua/access/rights.html<!-- CHANGE RIGHTS URL --></dc:rights>
+      	  [% END -%]
+          [% handle_present = 'no' -%]
+       	  [% FOREACH digital_object IN object.digital_objects -%]
+      	   [% IF digital_object.permanent_url -%]
+          <!-- If there are multiple digital object class instances, verify that this is the right handle. -->
+          [% handle_present = 'yes' -%]
+      	  <dc:identifier>[% digital_object.permanent_url -%]</dc:identifier>
+      	    [% LAST -%]
+      	   [% END -%]
+      	   [% END -%]
+      	   [% IF handle_present == 'no' -%]
+      	  <dc:identifier>PUTHANDLEHERE</dc:identifier>
+      	  [% END -%]
+      	  <dc:type>[% object.dc_type -%]</dc:type>	    
+      	  [% FOR digital_object IN object.digital_objects -%]
+      	   [% IF digital_object.format -%]
+          <!-- If there are multiple digital object class instances, verify that this is the right format. -->
+      	  <dc:format>[% digital_object.format.name.remove(' --.*') -%]</dc:format>
+      	    [% BREAK -%]
+      	   [% END -%]
+      	  [% END -%]
+      
+      	  [% FOR personal_name IN object.item_personal_names -%]
+      	  <dcadesc:persname>[% personal_name.name -%]</dcadesc:persname>
+      	  [% END -%]
+      
+      	  [% FOR corporate_name IN object.item_corporate_names -%]
+      	  <dcadesc:corpname>[% corporate_name.name -%]</dcadesc:corpname>
+      	  [% END -%]
+      
+      	  [% FOR geographic_term IN object.item_geographic_terms -%]
+      	  <dcadesc:geogname>[% geographic_term.term -%]</dcadesc:geogname>
+      	  [% END -%]
+      
+      	  [% FOR topic_term IN object.item_topic_terms -%]
+      	  <dcadesc:subject>[% topic_term.term -%]</dcadesc:subject>
+      	  [% END -%]
+      	 </dca_dc:dc>	  
+	    </foxml:xmlContent>
+      </foxml:datastreamVersion>
+      </foxml:datastream>
+      
+   [% matches = pid.match('tufts:(.*)') -%]	  
+
+	 [% SWITCH object.dc_type -%]
+	 
+	 [% CASE 'Image' -%]
+   [% content_model = 'cm:Image.4DS' -%]
+   [% IF digital_object.format == 'image/jpg' or digital_object.format == 'image/jpeg'  -%]
+   <foxml:datastream CONTROL_GROUP="E" ID="Archival.tif" STATE="A" VERSIONABLE="true">
+    <foxml:datastreamVersion ID="Archival.tif.0" LABEL="[% object.title.replace('"', '&quot;') -%]" MIMETYPE="image/jpeg">
+    <foxml:contentDigest TYPE="MD5" />
+    <foxml:contentLocation TYPE="URL" REF="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no -%]/archival_tif/[% matches.0 -%].archival.jpg" />
+    </foxml:datastreamVersion>
+   </foxml:datastream>
+   [% ELSE -%]
+   <foxml:datastream CONTROL_GROUP="E" ID="Archival.tif" STATE="A" VERSIONABLE="true">
+    <foxml:datastreamVersion ID="Archival.tif.0" LABEL="[% object.title.replace('"', '&quot;') -%]" MIMETYPE="image/tiff">
+    <foxml:contentDigest TYPE="MD5" />
+    <foxml:contentLocation TYPE="URL" REF="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no -%]/archival_tif/[% matches.0 -%].archival.tif" />
+    </foxml:datastreamVersion>
+   </foxml:datastream>
+   [% END -%]
+   <foxml:datastream CONTROL_GROUP="E" ID="Advanced.jpg" STATE="A" VERSIONABLE="true">
+    <foxml:datastreamVersion ID="Advanced.jpg.0" LABEL="[% object.title.replace('"', '&quot;') -%]" MIMETYPE="image/jpeg">
+    <foxml:contentDigest TYPE="MD5" />
+    <foxml:contentLocation TYPE="URL" REF="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no -%]/advanced_jpg/[% matches.0 -%].advanced.jpg" />
+    </foxml:datastreamVersion>
+   </foxml:datastream>
+   <foxml:datastream CONTROL_GROUP="E" ID="Basic.jpg" STATE="A" VERSIONABLE="true">
+    <foxml:datastreamVersion ID="Basic.jpg.0" LABEL="[% object.title.replace('"', '&quot;') -%]" MIMETYPE="image/jpeg">
+    <foxml:contentDigest TYPE="MD5" />
+    <foxml:contentLocation TYPE="URL" REF="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no -%]/basic_jpg/[% matches.0 -%].basic.jpg" />
+    </foxml:datastreamVersion>
+   </foxml:datastream>
+   <foxml:datastream CONTROL_GROUP="E" ID="Thumbnail.png" STATE="A" VERSIONABLE="true">
+    <foxml:datastreamVersion ID="Thumbnail.png.0" LABEL="[% object.title.replace('"', '&quot;') -%]" MIMETYPE="image/png">
+    <foxml:contentDigest TYPE="MD5" />
+    <foxml:contentLocation TYPE="URL" REF="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no -%]/thumb_png/[% matches.0 -%].thumb.png" />
+    </foxml:datastreamVersion>
+    </foxml:datastream>
+     
+  [% CASE 'Text' -%]  
+  
+   [% IF digital_object.format == 'application/msword' or digital_object.format == 'application/vnd.ms-powerpoint' -%]
+    <!-- If we are preserving the transfer version of the file but do not want it publicly accessible. -->
+   [% content_model = 'cm:Text.PDF' -%]
+    <foxml:datastream CONTROL_GROUP="E" ID="transferClosed" STATE="A" VERSIONABLE="true">
+      <foxml:datastreamVersion ID="transferClosed.0" LABEL="[% object.title.replace('"', '&quot;') -%]" MIMETYPE="[% digital_object.format -%]">
+      <foxml:contentDigest TYPE="MD5" />
+      <foxml:contentLocation TYPE="URL" REF="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no -%]/transfer_closed/[% matches.0 -%].transfer[% digital_object.file_extension -%]" />
+      </foxml:datastreamVersion>
+    </foxml:datastream>
+    <foxml:datastream CONTROL_GROUP="E" ID="Archival.pdf" STATE="A" VERSIONABLE="true">
+      <foxml:datastreamVersion ID="Archival.pdf.0" LABEL="[% object.title.replace('"', '&quot;') -%]" MIMETYPE="application/pdf">
+      <foxml:contentDigest TYPE="MD5" />
+      <foxml:contentLocation TYPE="URL" REF="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no -%]/archival_pdf/[% matches.0 -%].archival.pdf" />
+      </foxml:datastreamVersion>
+    </foxml:datastream>
+    <!-- To be used only if there is a preservationClosed data stream
+    <foxml:datastream CONTROL_GROUP="E" ID="preservationClosed" STATE="A" VERSIONABLE="true">
+      <foxml:datastreamVersion ID="preservationClosed.0" LABEL="[% object.title.replace('"', '&quot;') -%]" MIMETYPE="application/pdf">
+      <foxml:contentDigest TYPE="MD5" />
+      <foxml:contentLocation TYPE="URL" REF="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no -%]/preservation_closed/[% matches.0 -%].preservationClosed.pdf" />
+      </foxml:datastreamVersion>
+    </foxml:datastream>
+    -->
+   
+   [% ELSIF digital_object.format == 'application/tei+xml' or digital_object.format == 'text/xml' -%]
+   <!-- For TEI documents. -->
+   [% content_model = 'cm:Text.TEI' -%]
+   <foxml:datastream CONTROL_GROUP="E" ID="Archival.xml" STATE="A" VERSIONABLE="true">
+    <foxml:datastreamVersion ID="Archival.xml.0" LABEL="[% object.title.replace('"', '&quot;') -%]" MIMETYPE="text/xml">
+    <foxml:contentDigest TYPE="MD5" />
+    <foxml:contentLocation TYPE="URL" REF="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no -%]/archival_xml/[% matches.0 -%].archival[% digital_object.file_extension -%]" />
+    </foxml:datastreamVersion>
+   </foxml:datastream>
+      
+   [% ELSE -%]
+   <!-- If we are preserving and making accessible only a pdf of the object. -->
+   [% content_model = 'cm:Text.PDF' -%]
+   <foxml:datastream CONTROL_GROUP="E" ID="Archival.pdf" STATE="A" VERSIONABLE="true">
+      <foxml:datastreamVersion ID="Archival.pdf.0" LABEL="[% object.title.replace('"', '&quot;') -%]" MIMETYPE="application/pdf">
+      <foxml:contentDigest TYPE="MD5" />
+      <foxml:contentLocation TYPE="URL" REF="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no -%]/archival_pdf/[% matches.0 -%].archival.pdf" />
+      </foxml:datastreamVersion>
+    </foxml:datastream>
+   [% END -%]
+   
+   [% CASE 'Sound' -%]
+	  [% FOR digital_object IN object.digital_objects -%]
+     [% audio_with_transcript = 'false' -%]
+     [% IF digital_object.format == 'text/xml' -%]
+      [% audio_with_transcript = 'true' -%]
+      [% transcript_extension = '.xml' -%]
+     [% ELSIF digital_object.format == 'application/tei+xml' -%]
+      [% audio_with_transcript = 'true' -%]
+      [% transcript_extension = '.tei' -%]
+	   [% ELSE -%]
+      [% extension = digital_object.file_extension -%]
+	   [% END -%]
+	  [% END -%]
+    [% IF audio_with_transcript == 'true' -%]
+     [% content_model ='cm:Audio.OralHistory' -%]\
+     <!-- Make sure this is correct for the file type of the access sound. -->
+      <foxml:datastream ID="ACCESS_MP3" STATE="A" CONTROL_GROUP="E" VERSIONABLE="true">
+      <foxml:datastreamVersion ID="ACCESS_MP3.0" LABEL="[% object.title.replace('"', '&quot;') -%]" MIMETYPE="audio/mpeg">
+      <foxml:contentDigest TYPE="MD5" />
+      <foxml:contentLocation TYPE="URL" REF="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no -%]/access_mp3/[% matches.0 -%].access.mp3"/>
+      </foxml:datastreamVersion>
+      </foxml:datastream>
+     <!-- Make sure this is correct for the file type of the archival sound. -->
+      <foxml:datastream ID="ARCHIVAL_WAV" STATE="A" CONTROL_GROUP="E" VERSIONABLE="true">
+      <foxml:datastreamVersion ID="ARCHIVAL_SOUND.0" LABEL="[% object.title.replace('"', '&quot;') -%]" MIMETYPE="application/octet-stream">
+      <foxml:contentDigest TYPE="MD5" />
+      <foxml:contentLocation TYPE="URL" REF="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no -%]/archival_wav/[% matches.0 -%].archival[% extension -%]"/>
+      </foxml:datastreamVersion>
+      </foxml:datastream>
+     <!-- Make sure this is correct for the file extension of the archival tei. -->
+      <foxml:datastream CONTROL_GROUP="E" ID="ARCHIVAL_XML" STATE="A" VERSIONABLE="true">
+      <foxml:datastreamVersion ID="ARCHIVAL_XML.0" LABEL="[% object.title.replace('"', '&quot;') -%]" MIMETYPE="text/xml">
+      <foxml:contentDigest TYPE="MD5" />
+      <foxml:contentLocation TYPE="URL" REF="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no -%]/archival_xml/[% matches.0 -%].archival[% transcript_extension -%]" />
+      </foxml:datastreamVersion>
+      </foxml:datastream>
+ 	  [% ELSE -%]
+     [% content_model ='cm:Audio' -%]
+     <!-- Make sure this is correct for the file type of the access sound. -->
+      <foxml:datastream ID="ACCESS_MP3" STATE="A" CONTROL_GROUP="E" VERSIONABLE="true">
+      <foxml:datastreamVersion ID="ACCESS_MP3.0" LABEL="[% object.title.replace('"', '&quot;') -%]" MIMETYPE="audio/mpeg">
+      <foxml:contentDigest TYPE="MD5" />
+      <foxml:contentLocation TYPE="URL" REF="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no -%]/access_mp3/[% matches.0 -%].access.mp3"/>
+      </foxml:datastreamVersion>
+      </foxml:datastream>
+     <!-- Make sure this is correct for the file type of the archival sound. -->
+      <foxml:datastream ID="ARCHIVAL_WAV" STATE="A" CONTROL_GROUP="E" VERSIONABLE="true">
+      <foxml:datastreamVersion ID="ARCHIVAL_SOUND.0" LABEL="[% object.title.replace('"', '&quot;') -%]" MIMETYPE="application/octet-stream">
+      <foxml:contentDigest TYPE="MD5" />
+      <foxml:contentLocation TYPE="URL" REF="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no -%]/archival_wav/[% matches.0 -%].archival[% extension -%]"/>
+      </foxml:datastreamVersion>
+      </foxml:datastream>
+	  [% END -%] [%# End of conditional comparing with and without transcript -%]
+	  
+   [% CASE 'MovingImage' -%]
+	  [% FOR digital_object IN object.digital_objects -%]
+         [% video_with_transcript = 'false' -%]
+         [% IF digital_object.format == 'text/xml' -%]
+      [% video_with_transcript = 'true' -%]
+      [% transcript_extension = '.xml' -%]
+     [% ELSIF digital_object.format == 'application/tei+xml' -%]
+      [% video_with_transcript = 'true' -%]
+      [% transcript_extension = '.tei' -%]
+	   [% ELSE -%]
+      [% extension = digital_object.file_extension -%]
+	   [% END -%]
+	  [% END -%]
+    [% content_model ='afmodel:TuftsVideo' -%]
+    [% IF video_with_transcript == 'true' -%]
+     <foxml:datastream ID="Archival.video" STATE="A" CONTROL_GROUP="E" VERSIONABLE="true">
+      <foxml:datastreamVersion ID="Archival.video.0" LABEL="[% object.title.replace('"', '&quot;') -%]" MIMETYPE="video/mp4">
+         <foxml:contentDigest TYPE="MD5"/>
+         <foxml:contentLocation TYPE="URL" REF="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no -%]/archival_video/[% matches.0 -%].archival[% extension -%]" />
+      </foxml:datastreamVersion>
+    </foxml:datastream>
+     <!-- Make sure this is correct for the file extension of the archival tei. -->
+     <foxml:datastream CONTROL_GROUP="E" ID="ARCHIVAL_XML" STATE="A" VERSIONABLE="true">
+      <foxml:datastreamVersion ID="ARCHIVAL_XML.0" LABEL="[% object.title.replace('"', '&quot;') -%]" MIMETYPE="text/xml">
+         <foxml:contentDigest TYPE="MD5"/>
+         <foxml:contentLocation TYPE="URL" REF="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no -%]/archival_xml/[% matches.0 -%].archival[% transcript_extension -%]" />
+      </foxml:datastreamVersion>
+     </foxml:datastream>
+     <foxml:datastream ID="Access.webm" STATE="A" CONTROL_GROUP="E" VERSIONABLE="true">
+      <foxml:datastreamVersion ID="Access.webm.0" LABEL="[% object.title.replace('"', '&quot;') -%]" MIMETYPE="video/webm">
+         <foxml:contentDigest TYPE="MD5"/>
+         <foxml:contentLocation TYPE="URL" REF="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no -%]/access_webm/[% matches.0 -%].access.webm"/>
+      </foxml:datastreamVersion>
+    </foxml:datastream>
+    <foxml:datastream ID="Access.mp4" STATE="A" CONTROL_GROUP="E" VERSIONABLE="true">
+      <foxml:datastreamVersion ID="Access.mp4.0" LABEL="[% object.title.replace('"', '&quot;') -%]" MIMETYPE="video/mp4">
+         <foxml:contentDigest TYPE="MD5"/>
+         <foxml:contentLocation TYPE="URL" REF="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no -%]/access_mp4/[% matches.0 -%].access.mp4" />
+      </foxml:datastreamVersion>
+    </foxml:datastream>
+    <foxml:datastream ID="Thumbnail.png" STATE="A" CONTROL_GROUP="E" VERSIONABLE="true">
+      <foxml:datastreamVersion ID="Thumbnail.png.0" LABEL="[% object.title.replace('"', '&quot;') -%]" MIMETYPE="image/png">
+         <foxml:contentDigest TYPE="MD5"/>
+         <foxml:contentLocation TYPE="URL" REF="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no -%]/thumb_png/[% matches.0 -%].thumb.png" />
+      </foxml:datastreamVersion>
+    </foxml:datastream> 
+    [% ELSE -%]
+	  <foxml:datastream ID="Archival.video" STATE="A" CONTROL_GROUP="E" VERSIONABLE="true">
+      <foxml:datastreamVersion ID="Archival.video.0" LABEL="[% object.title.replace('"', '&quot;') -%]" MIMETYPE="video/mp4">
+         <foxml:contentDigest TYPE="MD5"/>
+         <foxml:contentLocation TYPE="URL" REF=http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no -%]/archival_video/[% matches.0 -%].archival[% extension -%]" />
+      </foxml:datastreamVersion>
+    </foxml:datastream>
+    <foxml:datastream ID="Access.webm" STATE="A" CONTROL_GROUP="E" VERSIONABLE="true">
+      <foxml:datastreamVersion ID="Access.webm.0" LABEL="[% object.title.replace('"', '&quot;') -%]" MIMETYPE="video/webm">
+         <foxml:contentDigest TYPE="MD5"/>
+         <foxml:contentLocation TYPE="URL" REF="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no -%]/access_webm/[% matches.0 -%].access.webm"/>
+      </foxml:datastreamVersion>
+    </foxml:datastream>
+    <foxml:datastream ID="Access.mp4" STATE="A" CONTROL_GROUP="E" VERSIONABLE="true">
+      <foxml:datastreamVersion ID="Access.mp4.0" LABEL="[% object.title.replace('"', '&quot;') -%]" MIMETYPE="video/mp4">
+         <foxml:contentDigest TYPE="MD5"/>
+         <foxml:contentLocation TYPE="URL" REF="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no -%]/access_mp4/[% matches.0 -%].access.mp4" />
+      </foxml:datastreamVersion>
+    </foxml:datastream>
+    <foxml:datastream ID="Thumbnail.png" STATE="A" CONTROL_GROUP="E" VERSIONABLE="true">
+      <foxml:datastreamVersion ID="Thumbnail.png.0" LABEL="[% object.title.replace('"', '&quot;') -%]" MIMETYPE="image/png">
+         <foxml:contentDigest TYPE="MD5"/>
+         <foxml:contentLocation TYPE="URL" REF="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/[% coll_no -%]/thumb_png/[% matches.0 -%].thumb.png" />
+      </foxml:datastreamVersion>
+    </foxml:datastream> 
+    [% END -%] [%# End of conditional comparing with and without transcript -%]
+  [% CASE DEFAULT -%]
+   <!-- ERROR TYPE NOT FOUND -->
+   [% END -%]
+   
+  <foxml:datastream CONTROL_GROUP="X" ID="RELS-EXT" STATE="A" VERSIONABLE="true">
+    <foxml:datastreamVersion FORMAT_URI="info:fedora/fedora-system:FedoraRELSExt-1.0" ID="RELS-EXT.0" LABEL="Relationships to other objects" MIMETYPE="text/xml">
+      <foxml:contentDigest TYPE="MD5" />
+      <foxml:xmlContent>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:rel="info:fedora/fedora-system:def/relations-external#" xmlns:rcr="http://dca.lib.tufts.edu/ontology/rcr#">
+	       <rdf:Description rdf:about="info:fedora/[% pid -%]">
+	       <fedora-model:hasModel xmlns:fedora-model="info:fedora/fedora-system:def/model#" rdf:resource="info:fedora/[% content_model -%]"/>
+	       [% FOR digital_object IN object.digital_objects -%]
+	           [% FOR relationship IN digital_object.digital_object_relationships -%]
+	       <[% relationship.predicate -%] rdf:resource="info:fedora/[% relationship.pid -%]" />
+	           [% END -%]
+	       [% END -%]
+          </rdf:Description>
+        </rdf:RDF>
+      </foxml:xmlContent>
+    </foxml:datastreamVersion>
+  </foxml:datastream>
+  
+ </foxml:digitalObject>
+
+[% ELSIF object.type == 'collection' -%]
+   <foxml:digitalObject VERSION="1.1" PID="tufts:UA069.001.DO.[% object.number -%]" xmlns:foxml="info:fedora/fedora-system:def/foxml#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="info:fedora/fedora-system:def/foxml# http://www.fedora.info/definitions/1/0/foxml1-1.xsd">
+    <foxml:objectProperties>
+    <foxml:property NAME="info:fedora/fedora-system:def/model#state" VALUE="Active"/>
+    <foxml:property NAME="info:fedora/fedora-system:def/model#label" VALUE="[% object.title.replace('"', '&quot;') -%]"/>
+    <foxml:property NAME="info:fedora/fedora-system:def/model#ownerId" VALUE=""/>
+    <foxml:property NAME="info:fedora/fedora-system:def/model#createdDate" VALUE=""/>
+    <foxml:property NAME="info:fedora/fedora-system:def/view#lastModifiedDate" VALUE=""/>
+    </foxml:objectProperties>
+     
+     <foxml:datastream CONTROL_GROUP="X" ID="DC" STATE="A" VERSIONABLE="true">
+      <foxml:datastreamVersion FORMAT_URI="http://www.openarchives.org/OAI/2.0/oai_dc/" ID="DC.1" LABEL="Dublin Core Metadata" MIMETYPE="text/xml">
+      <foxml:contentDigest TYPE="MD5" />
+      <foxml:xmlContent>
+        <oai_dc:dc xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.fedora.info/definitions/">
+          <dc:title>[% object.title %]</dc:title>
+          <dc:creator>Digital Collections and Archives</dc:creator>
+        </oai_dc:dc>
+      </foxml:xmlContent>
+    </foxml:datastreamVersion>
+  </foxml:datastream>
+     
+     <foxml:datastream CONTROL_GROUP="X" ID="DCA-ADMIN" STATE="A" VERSIONABLE="true">
+      <foxml:datastreamVersion ID="DCA-ADMIN.1" LABEL="DCA Administrative Metadata" MIMETYPE="text/xml" >
+      <foxml:contentDigest TYPE="MD5" />
+      <foxml:xmlContent>
+        <dca_admin:admin xmlns:admin="http://nils.lib.tufts.edu/admin/" xmlns:local="http://nils.lib.tufts.edu/dcaadmin/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dca_admin="http://nils.lib.tufts.edu/dca_admin/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xlink="http://www.w3.org/TR/xlink">
+                <local:steward>dca</local:steward>
+                <local:displays>dl</local:displays>
+                <local:createdby>CIDER</local:createdby>
+                <!-- ISO date of embargo end if embargo <local:embargo></local:embargo> -->
+        </dca_admin:admin>
+      </foxml:xmlContent>
+    </foxml:datastreamVersion>
+  </foxml:datastream>
+
+<foxml:datastream CONTROL_GROUP="X" ID="DCA-META" STATE="A" VERSIONABLE="true">
+    <foxml:datastreamVersion ID="DCA-META.1" LABEL="DCA Descriptive Metadata" MIMETYPE="text/xml" >
+      <foxml:contentDigest TYPE="MD5" />
+      <foxml:xmlContent>
+        <dca_dc:dc xmlns:dca_dc="http://nils.lib.tufts.edu/dca_dc/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcatech="http://nils.lib.tufts.edu/dcatech/" xmlns:dcadesc="http://nils.lib.tufts.edu/dcadesc/">
+          <dc:title>[% object.title %]</dc:title>
+          <dc:description>Finding aid for the [% object.title %] at the Digital Collections and Archives, Tufts University.</dc:description>
+          <dc:source>UA069</dc:source>
+          <dcterms:isPartOf>UA069</dcterms:isPartOf>
+          <dcterms:isPartOf>[% object.number %]</dcterms:isPartOf>
+          <dc:creator>Digital Collections and Archives</dc:creator>
+          <dc:publisher>Tufts University. Digital Collections and Archives</dc:publisher>
+          <dc:rights>http://dca.tufts.edu/ua/access/rights.html</dc:rights>
+          [% IF object.permanent_url -%]
+	       <dc:identifier>[% object.permanent_url %]</dc:identifier>
+	      [% ELSE -%]
+	       <dc:identifier>PUTHANDLEHERE</dc:identifier>
+	      [% END -%]
+	      [% IF object.date_from %]
+	       <dc:date.created>[% object.date_from %]</dc:date.created>
+	      [% END -%]
+	      <dc:date.available>[% object.audit_trail.date_created %]</dc:date.available>
+	      <dc:date.issued>[% date.format %]</dc:date.issued>
+	      <dc:type>text</dc:type>
+          <dc:format>text/xml</dc:format>
+          [% FOR subject IN object.subjects -%]
+           <dc:subject>[% subject.subject %]</dc:subject>
+          [% END -%]
+        </dca_dc:dc>
+      </foxml:xmlContent>
+    </foxml:datastreamVersion>
+  </foxml:datastream>
+  
+      <foxml:datastream CONTROL_GROUP="E" ID="Archival.xml" STATE="A" VERSIONABLE="true">
+       <foxml:datastreamVersion ID="Archival.xml.0" LABEL="[% object.title.replace('"', '&quot;') %]" MIMETYPE="text/xml">
+       <foxml:contentDigest TYPE="MD5" />
+       <foxml:contentLocation TYPE="URL" REF="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/UA069/archival_xml/UA069.001.DO.[% object.number %].archival.xml" />
+       </foxml:datastreamVersion>
+      </foxml:datastream>
+    
+    <foxml:datastream CONTROL_GROUP="X" ID="RELS-EXT" STATE="A" VERSIONABLE="true">
+    <foxml:datastreamVersion FORMAT_URI="info:fedora/fedora-system:FedoraRELSExt-1.0" ID="RELS-EXT.0" LABEL="Relationships to other objects" MIMETYPE="application/rdf+xml" >
+      <foxml:contentDigest TYPE="MD5" />
+      <foxml:xmlContent>
+        <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:rel="info:fedora/fedora-system:def/relations-external#">
+	        <rdf:Description rdf:about="info:fedora/tufts:UA069.001.DO.[% object.number %]">
+            <rel:isMemberOfCollection rdf:resource="info:fedora/tufts:UA069.006.DO.[% object.number %]"/>
+            <fedora-model:hasModel xmlns:fedora-model="info:fedora/fedora-system:def/model#" rdf:resource="info:fedora/cm:Text.EAD"/>
+            <itemID xmlns="http://www.openarchives.org/OAI/2.0/">oai:tufts:UA069.001.DO.[% object.number %]</itemID>
+	        </rdf:Description>
+	 </rdf:RDF>
+      </foxml:xmlContent>
+    </foxml:datastreamVersion>
+  </foxml:datastream>
+</foxml:digitalObject>   
+
+[% END -%]
+[% END -%]
+
+[% FOR rc IN rcs -%]
+   <foxml:digitalObject VERSION="1.1" PID="tufts:[% rc.record_id -%]" xmlns:foxml="info:fedora/fedora-system:def/foxml#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="info:fedora/fedora-system:def/foxml# http://www.fedora.info/definitions/1/0/foxml1-1.xsd">
+    <foxml:objectProperties>
+    <foxml:property NAME="info:fedora/fedora-system:def/model#state" VALUE="Active"/>
+    <foxml:property NAME="info:fedora/fedora-system:def/model#label" VALUE="[% rc.name_entry.replace('"', '&quot;') %]"/>
+    <foxml:property NAME="info:fedora/fedora-system:def/model#ownerId" VALUE=""/>
+    <foxml:property NAME="info:fedora/fedora-system:def/model#createdDate" VALUE=""/>
+    <foxml:property NAME="info:fedora/fedora-system:def/view#lastModifiedDate" VALUE=""/>
+    </foxml:objectProperties>
+     
+     <foxml:datastream CONTROL_GROUP="X" ID="DC" STATE="A" VERSIONABLE="true">
+      <foxml:datastreamVersion FORMAT_URI="http://www.openarchives.org/OAI/2.0/oai_dc/" ID="DC.1" LABEL="Dublin Core Metadata" MIMETYPE="text/xml">
+      <foxml:contentDigest TYPE="MD5" />
+      <foxml:xmlContent>
+        <oai_dc:dc xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.fedora.info/definitions/">
+          <dc:title>[% rc.name_entry %]</dc:title>
+          <dc:creator>Digital Collections and Archives</dc:creator>
+          <dc:identifier>tufts:[% rc.record_id -%]</dc:identifier>
+        </oai_dc:dc>
+      </foxml:xmlContent>
+    </foxml:datastreamVersion>
+  </foxml:datastream>
+     
+     <foxml:datastream CONTROL_GROUP="X" ID="DCA-ADMIN" STATE="A" VERSIONABLE="true">
+      <foxml:datastreamVersion ID="DCA-ADMIN.1" LABEL="DCA Administrative Metadata" MIMETYPE="text/xml" >
+      <foxml:contentDigest TYPE="MD5" />
+      <foxml:xmlContent>
+        <ac xmlns:ac="http://purl.org/dc/dcmitype/" xmlns:local="http://nils.lib.tufts.edu/dcaadmin/" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.fedora.info/definitions/" version="0.1">
+                <local:steward>dca</local:steward>
+                <local:displays>dl</local:displays>
+                <local:createdby>CIDER</local:createdby>
+        </ac>
+      </foxml:xmlContent>
+    </foxml:datastreamVersion>
+  </foxml:datastream>
+
+<foxml:datastream CONTROL_GROUP="X" ID="DCA-META" STATE="A" VERSIONABLE="true">
+    <foxml:datastreamVersion ID="DCA-META.1" LABEL="DCA Descriptive Metadata" MIMETYPE="text/xml" >
+      <foxml:contentDigest TYPE="MD5" />
+      <foxml:xmlContent>
+        <dca_dc:dc xmlns:dca_dc="http://nils.lib.tufts.edu/dca_dc/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcatech="http://nils.lib.tufts.edu/dcatech/" xmlns:dcadesc="http://nils.lib.tufts.edu/dcadesc/" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.fedora.info/definitions/">
+	    <dc:title>[% rc.name_entry %]</dc:title>
+        <dc:publisher>Tufts University. Digital Collections and Archives.</dc:publisher>
+        <dc:rights>http://dca.tufts.edu/ua/access/rights.html</dc:rights>
+        <dc:identifier>[% rc.record_id %]</dc:identifier>
+        [% IF object.permanent_url -%]
+	    <dc:identifier>[% object.permanent_url %]</dc:identifier>
+	    [% ELSE -%]
+	    <dc:identifier>PUTHANDLEHERE</dc:identifier>
+	    [% END -%]
+	    
+	    [% IF rc.date_from %]
+	    <dc:date.created>[% rc.date_from %]</dc:date.created>
+	    [% END -%]	    
+	    <dc:date.available>[% rc.audit_trail.date_created.strftime('%Y-%m-%d') %]</dc:date.available>
+	    <dc:date.issued>[% date.format %]</dc:date.issued>
+	    <dc:type>text</dc:type>
+        <dc:format>text/xml</dc:format>
+     </dca_dc:dc>
+      </foxml:xmlContent>
+    </foxml:datastreamVersion>
+  </foxml:datastream>
+      
+      <foxml:datastream CONTROL_GROUP="E" ID="Archival.xml" STATE="A" VERSIONABLE="true">
+       <foxml:datastreamVersion ID="Archival.xml.0" LABEL="[% rc.name_entry.replace('"', '&quot;') %]" MIMETYPE="text/xml">
+       <foxml:contentDigest TYPE="MD5" />
+       <foxml:contentLocation TYPE="URL" REF="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/RCR/[% rc.record_id %].xml" />
+       </foxml:datastreamVersion>
+      </foxml:datastream>
+      
+    <foxml:datastream CONTROL_GROUP="X" ID="RELS-EXT" STATE="A" VERSIONABLE="true">
+    <foxml:datastreamVersion FORMAT_URI="info:fedora/fedora-system:FedoraRELSExt-1.0" ID="RELS-EXT.0" LABEL="Relationships to other objects" MIMETYPE="application/rdf+xml" >
+      <foxml:contentDigest TYPE="MD5" />
+      <foxml:xmlContent>
+        <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rcr="http://dca.lib.tufts.edu/ontology/rcr#" xmlns:rel="info:fedora/fedora-system:def/relations-external#" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.fedora.info/definitions/">    <rdf:Description rdf:about="info:fedora/tufts:[% rc.record_id %]">
+	            <itemID xmlns="http://www.openarchives.org/OAI/2.0/">oai:tufts:[% rc.record_id %]</itemID>
+                <fedora-model:hasModel rdf:resource="info:fedora/cm:Text.RCR" xmlns:fedora-model="info:fedora/fedora-system:def/model#"/>
+                <rel:isMemberOfCollection rdf:resource="info:fedora/tufts:UA069.006.DO.RCR"/>
+                <!-- INSERT RELATIONSHIPS TO OTHER RCRS HERE-->
+                [% FOR rels IN rc.record_context_relationships -%]
+                <rcr:[% rels.type %] rdf:resource="info:fedora/tufts:[% FOR relrc IN rels.related_entity %][% relrc.record_id %]"/>
+                [% END -%]
+                [% END -%]      
+	        </rdf:Description>
+	   </rdf:RDF>
+      </foxml:xmlContent>
+    </foxml:datastreamVersion>
+  </foxml:datastream>
+</foxml:digitalObject>   
+
+ [%# Make sure there's always a newline after the final closing tag. -%]
+[% END -%]
+
+</input>
