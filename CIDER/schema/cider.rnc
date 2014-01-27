@@ -53,6 +53,7 @@ item = element item {
   element date { dateRange? }?,
   # Default restrictions is "none".
   element restrictions { restrictions? }?,
+  element embargoEndDate { date? }?,
   element accessionNumber { accessionNumber? }?,
   # Default dcType is "Text".
   element dcType { dcType? }?,
@@ -165,7 +166,8 @@ document = element document {
   element location { locationID },
   element format { format? }?,
   element dimensions { line? }?,
-  element rights { multiline? }?
+  element rights { multiline? }?,
+  element notes { multiline? }?
 }
 
 physicalImage = element physicalImage {
@@ -173,7 +175,8 @@ physicalImage = element physicalImage {
   element location { locationID },
   element format { format? }?,
   element dimensions { line? }?,
-  element rights { multiline? }?
+  element rights { multiline? }?,
+  element notes { multiline? }?
 }
 
 digitalObject = element digitalObject {
