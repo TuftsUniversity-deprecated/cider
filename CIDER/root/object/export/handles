@@ -1,6 +1,7 @@
 [% c.res.content_type = 'application/xml' -%]
 <?xml version="1.0" ?>
 <import>
+[% IF object.type =='item' -%]
 [% FOR object IN objects -%]
   <update>
     <item number="[% object.number %]" parent="[% object.parent.number %]">
@@ -16,4 +17,17 @@
     </item>
   </update>
 [% END -%]
+[% ELSE -%]
+    <update>
+        <collection number="[% object.number -%]">
+        <title>[% object.title -%]</title>
+        [% IF object.permanent_url -%]
+	       <permanentURL>[% object.permanent_url %]</permanentURL>
+	      [% ELSE -%]
+	       <permanentURL>PUTHANDLEHERE</permanentURL>
+	      [% END -%]
+        <pid>tufts:UA069.001.DO.[% object.number -%]</pid>
+        </collection>
+    </update>
+    [% END -%]
 </import>
