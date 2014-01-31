@@ -552,13 +552,13 @@
     </foxml:datastreamVersion>
   </foxml:datastream>
       
-      <foxml:datastream CONTROL_GROUP="E" ID="Archival.xml" STATE="A" VERSIONABLE="true">
-       <foxml:datastreamVersion ID="Archival.xml.0" LABEL="[% rc.name_entry.replace('"', '&quot;') %]" MIMETYPE="text/xml">
+      <foxml:datastream CONTROL_GROUP="E" ID="RCR-CONTENT" STATE="A" VERSIONABLE="true">
+       <foxml:datastreamVersion ID="RCR-CONTENT.0" LABEL="[% rc.name_entry.replace('"', '&quot;') %]" MIMETYPE="text/xml">
        <foxml:contentDigest TYPE="MD5" />
        <foxml:contentLocation TYPE="URL" REF="http://bucket01.lib.tufts.edu/data05/tufts/central/dca/RCR/[% rc.record_id %].xml" />
        </foxml:datastreamVersion>
       </foxml:datastream>
-      
+
     <foxml:datastream CONTROL_GROUP="X" ID="RELS-EXT" STATE="A" VERSIONABLE="true">
     <foxml:datastreamVersion FORMAT_URI="info:fedora/fedora-system:FedoraRELSExt-1.0" ID="RELS-EXT.0" LABEL="Relationships to other objects" MIMETYPE="application/rdf+xml" >
       <foxml:contentDigest TYPE="MD5" />
