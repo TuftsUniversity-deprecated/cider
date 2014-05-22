@@ -38,4 +38,5 @@
 <td>[% object.notes %]</td>
 </tr>
 [% END %]
+[% INCLUDE object/lib/restrictions.tt %]
 </table>
