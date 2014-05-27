@@ -41,11 +41,11 @@
     	  [% CALL physImgSpec.append(physical_image.dimensions,', ') -%]
     	  [% END -%]
     	  [% IF physical_image.format -%]
-    	  [% CALL physImgSpec.append(physical_image.format) -%]
+    	  [% CALL physImgSpec.append(physical_image.format, '. ') -%]
     	  [% END -%]
     	  [% END -%]
-	  	  [% IF object.abstract OR object.volume OR object.issue OR object.description OR object.circa OR physImgSpec.length==0 -%]
-	      <dc:description>[% IF object.circa -%]This date is approximate.[% END -%][% IF object.volume -%] Volume [% object.volume -%][% END -%][% IF object.volume AND object.issue -%],[% END -%][% IF object.issue -%] Issue[% object.issue -%][% END -%][% IF object.volume AND object.issue -%].[% END -%][% IF physImgSpec.length -%] [% physImgSpec -%].[% END -%][% IF object.description -%][% object.description -%][% END -%][% IF object.abstract -%] Abstract: [% object.abstract -%][% END -%]</dc:description>
+	  	  [% IF object.abstract OR object.volume OR object.issue OR object.description OR object.circa OR physImgSpec -%]
+	      <dc:description>[% IF object.circa -%]This date is approximate. [% END -%][% IF object.volume AND object.issue -%]Volume [% object.volume -%], Issue [% object.issue -%]. [% ELSIF object.volume AND NOT object.issue -%]Volume [% object.volume -%]. [% ELSIF object.issue AND NOT object.volume -%]Issue [% object.issue -%]. [% END -%][% IF physImgSpec.length -%][% physImgSpec -%][% END -%][% IF object.description -%][% object.description -%] [% END -%][% IF object.abstract -%] Abstract: [% object.abstract -%][% END -%]</dc:description>
 	      [% END -%]
         <dc:publisher>Tufts University. Digital Collections and Archives.</dc:publisher>
         [% matches = object.number.match('(\w{5})') -%]
