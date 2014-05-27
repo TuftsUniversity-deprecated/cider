@@ -16,7 +16,7 @@
 [% IF object.permanent_url %]
 <tr>
 <th>Finding aid</th>
-<td>[% object.permanent_url %]</td>
+<td><a href="[% object.permanent_url %]">[% object.permanent_url %]</a></td>
 </tr>
 [% END %]
 <tr>
@@ -29,7 +29,7 @@
 </tr>
 <tr>
 <th>Processing status</th>
-<td>[% object.processing_status.name %]</td>
+<td>[% object.processing_status.description %]</td>
 </tr>
 <tr>
 <th>Documentation</th>
