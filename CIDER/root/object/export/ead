@@ -16,7 +16,11 @@
       BLOCK;
         "<unitdate type=\"inclusive\">" _ object.date_from;
         IF object.date_to;
+           IF object.date_to == object.date_from;
+           "</unitdate>";
+           ELSE;
 	  "-" _ object.date_to _ "</unitdate>";
+	  END;
 	ELSE;
 	  "</unitdate>"; 
 	END;

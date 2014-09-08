@@ -6,7 +6,7 @@
         <update>
             <item number="[% object.number -%]" parent="[% object.parent.number -%]">
             <title>[% object.title -%]</title>
-           [% IF object.item_creator_names -%]
+           [% IF object.item_creators -%]
            <creators>
             [% FOR creator IN object.item_creators -%]
  	    <creator><name>[% creator.name -%]</name></creator>
@@ -182,8 +182,8 @@
                 <format>[% digital_object.format -%]</format>
                 [% END -%]
                 <pid>[% digital_object.pid -%]</pid>
-                [% IF digital_object.permanent_URL -%]
-                <permanentURL>[% digital_object.permanent_URL -%]</permanentURL>
+                [% IF digital_object.permanent_url -%]
+                <permanentURL>[% digital_object.permanent_url -%]</permanentURL>
                 [% END -%]
                 [% IF digital_object.notes -%]
                 <notes>[% digital_object.notes -%]</notes>
