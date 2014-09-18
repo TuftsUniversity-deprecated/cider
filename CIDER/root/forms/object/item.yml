@@ -824,7 +824,7 @@ elements:
                              resultset: StabilizationProcedure
                              label_column: name
                         - type: Textarea
-                          name: notes
+                          name: stabilization_notes
                           label: Notes
 
                     - type: Fieldset
