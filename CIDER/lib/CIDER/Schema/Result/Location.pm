@@ -38,6 +38,15 @@ __PACKAGE__->has_many(
         'CIDER::Schema::Result::LocationSeriesNumber',
 );
 
+__PACKAGE__->has_many(
+    object_locations =>
+        'CIDER::Schema::Result::ObjectLocation',
+);
+
+__PACKAGE__->many_to_many(
+    objects => 'object_locations', 'object',
+);
+
 __PACKAGE__->add_columns(
     barcode =>
         { data_type => 'varchar' },
@@ -80,6 +89,12 @@ sub update_from_xml {
 sub name_and_note {
     my $self = shift;
     return $self->barcode;
+}
+
+sub self_referencing_object_locations {
+    my $self = shift;
+
+    return $self->object_locations->search( { object => \' = referent_object' } );
 }
 
 =head1 LICENSE
