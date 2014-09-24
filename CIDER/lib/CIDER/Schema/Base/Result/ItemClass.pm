@@ -76,6 +76,25 @@ sub insert {
     return $self;
 }
 
+# delete: On delete, clean up the object_location table appropriately as well, if
+#         necessary.
+sub delete {
+    my $self = shift;
+
+    $self->next::method( @_ );
+
+    if ( not( $self->in_storage ) && $self->can( 'location' ) ) {
+        $self->result_source->schema->resultset( 'ObjectLocation' )
+             ->search( {
+                object   => $self->item->id,
+                location => $self->location->id,
+               } )
+             ->delete_all;
+    }
+
+    return $self;
+}
+
 sub setup_item {
     my ( $class ) = @_;
 
