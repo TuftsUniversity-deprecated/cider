@@ -181,8 +181,8 @@ is( $co->note, undef,
     'Corporate name has no note.' );
 is( $item->topic_terms, 2,
     'Item has two topic terms.' );
-is( $item->classes, 7,
-    'Item has seven classes.' );
+is( $item->classes, 8,
+    'Item has eight classes.' );
 is( $item->is_group, 1,
     'Item is a group.' );
 is( $item->file_folders->first->location->unit_type, 'Digital objects',
@@ -200,6 +200,8 @@ my @tdos = $item->three_dimensional_objects;
 is( $tdos[0]->format->id, $tdos[1]->format->id,
     'The 3d-object format authority terms are the same.' );
 my @dos = $item->digital_objects;
+shift @dos;
+
 is( $dos[0]->stabilized_by->user->username, 'alice',
     'First digital object stabilized by alice.' );
 is( $dos[0]->stabilization_date, '2010',

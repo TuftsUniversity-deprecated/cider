@@ -245,7 +245,7 @@ is( $csv->[2]->{ type }, 'item',
 $mech->get( '/object/n1' );
 $mech->submit_form_ok ( { with_fields => {
     descendants => 1,
-    template => 'xml-export.tt',
+    template => 'xmlExport.tt',
 } }, 'Export to XML' );
 is( $mech->ct, 'application/xml', 'MIME type is correct' );
 
@@ -257,13 +257,14 @@ my @nodes = $root->nonBlankChildNodes;
 is( @nodes, 4,
     'Document has four elements.' );
 my $collection = $nodes[0];
-like( $collection->toString, qr/>minimal</,
+like( $collection->toString, qr/>some</,
     'Processing status is exported as text.' );
 
 $mech->get( '/object/II' );
+
 $mech->submit_form_ok ( { with_fields => {
     descendants => 0,
-    template => 'xml-export.tt',
+    template => 'xmlExport.tt',
 } }, 'Export to XML' );
 $mech->content_contains( '>Test Name<', 'Authority name is exported.' );
 
