@@ -9,18 +9,16 @@ has 'old_location' => (
     default => undef,
 );
 
-sub location {
+before 'set_column' => sub {
     my $self = shift;
-    if ( @_ ) {
+    my ( $column, $value ) = @_;
+    if ( ( $column eq 'location' ) && scalar( @_ ) == 2 ) {
         my %dirty_fields = $self->get_dirty_columns;
         unless ( $dirty_fields{ location } ) {
             $self->old_location( $self->location );
         }
     }
-
-    $self->_location( @_ );
-
-}
+};
 
 # update: If this item's location has changed, alter the object_location table
 #         appropriately.

@@ -23,7 +23,7 @@ __PACKAGE__->setup_item;
 
 __PACKAGE__->add_columns(
     location =>
-        { data_type => 'int', is_foreign_key => 1, accessor => '_location', },
+        { data_type => 'int', is_foreign_key => 1 },
 );
 
 __PACKAGE__->belongs_to(
