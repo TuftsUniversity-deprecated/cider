@@ -387,6 +387,14 @@ sub init_schema {
         ]
     );
 
+    $schema->populate(
+        'ObjectLocation',
+        [
+         [qw/id object referent_object location/],
+         [1, 4, 4, 1],
+        ]
+    );
+
 
     $schema->indexer->make_index;       # This clobbers any existing index.
 

@@ -3,7 +3,11 @@ package CIDER::Schema::Result::BoundVolume;
 use strict;
 use warnings;
 
-use base 'CIDER::Schema::Base::Result::ItemClass';
+use Moose;
+use MooseX::NonMoose;
+use MooseX::MarkAsMethods autoclean => 1;
+extends 'CIDER::Schema::Base::Result::ItemClass';
+with 'CIDER::HasLocation';
 
 =head1 NAME
 

@@ -3,7 +3,11 @@ package CIDER::Schema::Result::DigitalObject;
 use strict;
 use warnings;
 
-use base 'CIDER::Schema::Base::Result::ItemClass';
+use Moose;
+use MooseX::NonMoose;
+use MooseX::MarkAsMethods autoclean => 1;
+extends 'CIDER::Schema::Base::Result::ItemClass';
+with 'CIDER::HasLocation';
 
 use String::CamelCase qw( decamelize );
 
@@ -19,12 +23,14 @@ __PACKAGE__->setup_item;
 
 __PACKAGE__->add_columns(
     location =>
-        { data_type => 'int', is_foreign_key => 1 },
+        { data_type => 'int', is_foreign_key => 1, accessor => '_location', },
 );
+
 __PACKAGE__->belongs_to(
     location =>
         'CIDER::Schema::Result::Location',
 );
+
 
 __PACKAGE__->add_columns(
     format =>
