@@ -472,8 +472,8 @@ sub _update_derived_fields_of_my_ancestors {
         q{select min(item_date_from) as earliest_date, }
         . q{max(item_date_from) as latest_date_from, }
         . q{max(item_date_to) as latest_date_to }
-        . q{from item where id in }
-        . q{(select id from object where parent_path like ?)} );
+        . q{from item, object where item.id = object.id }
+        . q{and parent_path like ?} );
 
     my $restriction_sth = $dbh->prepare(
         q{select name from item, object, item_restrictions }
