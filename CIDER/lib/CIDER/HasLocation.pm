@@ -76,8 +76,8 @@ after 'delete' => sub {
     if ( not( $self->in_storage ) ) {
         $self->result_source->schema->resultset( 'ObjectLocation' )
              ->search( {
-                object   => $self->item->id,
-                location => $self->location->id,
+                referent_object => $self->item->id,
+                location        => $self->location->id,
                } )
              ->delete_all;
     }
