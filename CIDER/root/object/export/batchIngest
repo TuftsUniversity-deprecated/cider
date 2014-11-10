@@ -168,6 +168,9 @@
 	    <dc:date.issued>[% date.format %]</dc:date.issued>
 	    <dc:type>text</dc:type>
         <dc:format>text/xml</dc:format>
+         [% IF object.permanent_url -%]
+         <dc:identifier>[% object.permanent_url -%]</dc:identifier>
+        [% END -%]
         [% FOR subject IN object.subjects -%]
            <dc:subject>[% subject.subject %]</dc:subject>
           [% END -%]
