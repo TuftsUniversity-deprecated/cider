@@ -11,7 +11,7 @@
       content | html | html_para;
 -%]
 
-[%# Handles dates that are single or ranges and adds bulk dates if present -%] 
+[%# Generates dates that are single or ranges and adds bulk dates if present -%] 
 [% MACRO generate_unitdate(object)
       BLOCK;
         "<unitdate type=\"inclusive\">" _ object.date_from;
@@ -28,6 +28,21 @@
           "<unitdate type=\"bulk\">" _ object.bulk_date_from _ "-" _ object.bulk_date_to _ "</unitdate>";
         END;
       END;
+-%]
+
+[%# Generates dates for collection date -%] 
+[% MACRO generate_collectiondate(object)
+      BLOCK;
+        IF collection.date_to;
+           IF collection.date_to == collection.date_from;
+           collection.date_from;
+           ELSE;
+           collection.date_from _ "-" _ collection.date_to; 
+           END;
+       ELSE;
+           "undated";
+	   END;
+	 END;  
 -%]
 
 [%# Generates all the elements for a series or subseries. The <c0X> wrapper is generated in the body of the code -%]
@@ -113,12 +128,10 @@
 <ead xmlns="http://dca.tufts.edu/schema/ead" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://dca.lib.tufts.edu/schema/ead http://dca.lib.tufts.edu/schema/ead/ead.xsd">
   <eadheader langencoding="en">
 [% FOR collection IN objects -%]
-    [% daterange = collection.date_from _ '-' _ collection.date_to -%] 
-    [% fulltitle = collection.title _ ', ' _ daterange -%]
     <eadid>UA069.001.DO.[% collection.number %]</eadid>
     <filedesc>
       <titlestmt>
-        <titleproper>[% fulltitle %]</titleproper>
+        <titleproper>[% collection.title -%], [% generate_collectiondate(object) %]</titleproper>
       </titlestmt>
       <publicationstmt>
         <publisher>Digital Collection and Archives, Tufts University</publisher>
@@ -132,7 +145,7 @@
 
   <frontmatter>
     <titlepage>
-      <titleproper>[% fulltitle %]</titleproper>
+       <titleproper>[% collection.title -%], [% generate_collectiondate(object) %]</titleproper>
       <publisher>Digital Collection and Archives, Tufts University</publisher>
       <address>	 
         <addressLine>Medford, MA 02155</addressLine>
