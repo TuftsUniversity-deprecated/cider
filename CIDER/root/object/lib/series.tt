@@ -5,11 +5,18 @@
 [% object.dates %]
 </td>
 </tr>
-[% IF object.bulk_dates %]
+[% IF object.bulk_date_to %]
 <tr>
 <th>Bulk dates</th>
 <td>
-[% object.bulk_dates %]
+[% object.bulk_date_from %]-[% object.bulk_date_to -%]
+</td>
+</tr>
+[% ELSIF object.bulk_date_from %]
+<tr>
+<th>Bulk dates</th>
+<td>
+[% object.bulk_date_from %]
 </td>
 </tr>
 [% END %]
