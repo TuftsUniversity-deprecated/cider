@@ -193,12 +193,28 @@
         xmlns:dcadesc="http://nils.lib.tufts.edu/dcadesc/"
         xmlns:dcatech="http://nils.lib.tufts.edu/dcatech/" xmlns:dcterms="http://purl.org/dc/terms/"
         xmlns:admin="http://nils.lib.tufts.edu/dcaadmin/" xmlns:ac="http://purl.org/dc/dcmitype/"
+        xmlns:rcr="http://dca.lib.tufts.edu/ontology/rcr#"
         xmlns:rel="info:fedora/fedora-system:def/relations-external#">
+    <admin:steward>dca</admin:steward>
+    <admin:displays>dl</admin:displays>
+    <admin:createdby>CIDER</admin:createdby>
     <pid>tufts:[% rc.record_id -%]</pid>
     <file>[% rc.record_id -%].xml</file>
     <dc:title>[% rc.name_entry %]</dc:title>
     <dc:creator>Digital Collections and Archives</dc:creator>
-
+    <dc:publisher>Tufts University. Digital Collections and Archives.</dc:publisher>
+    <dc:rights>http://dca.tufts.edu/ua/access/rights.html</dc:rights>
+    <dc:identifier>[% rc.record_id -%]</dc:identifier>
+    <dc:date.created>[% rc.date_from %]</dc:date.created>
+    <dc:date.available>[% rc.audit_trail.date_created.strftime('%Y-%m-%d') %]</dc:date.available>
+    <dc:date.issued>[% date.format %]</dc:date.issued>
+    <dc:type>text</dc:type>
+    <dc:format>text/xml</dc:format>
+    <rel:hasModel>info:fedora/cm:Text.RCR</rel:hasModel>
+    <rel:isMemberOfCollection>tufts:UA069.006.DO.RCR</rel:isMemberOfCollection>
+    [% FOR rels IN rc.record_context_relationships -%]
+    <rcr:[% rels.type %]>[% FOR relrc IN rels.related_entity %]tufts:[% relrc.record_id %][% END -%]</rcr:[% rels.type %]>
+     [% END -%]
 
     </digitalObject>
 [% END -%]
