@@ -6,6 +6,7 @@
 [% MACRO remove_html(content) BLOCK -%] 
 [% HTML.escape(content.remove('</?p>')) -%]
 [% END -%]
+[% FOR object IN objects -%]
 [% IF object.type == 'collection' -%]
 <collection xmlns="http://www.loc.gov/MARC21/slim">
 [% FOR object IN objects -%]
@@ -47,8 +48,9 @@
 [% END -%]
 [% END -%]
   </record>
-[% END -%]
+
 </collection>
+[% END -%]
 
 [% ELSIF object.type == 'item' -%]
 <marc:collection xmlns:marc="http://www.loc.gov/MARC21/slim"
@@ -157,4 +159,4 @@
 [% END -%]
 </marc:collection>
 
-
+[% END -%]
