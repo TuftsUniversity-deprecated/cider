@@ -6,7 +6,7 @@
 [% MACRO remove_html(content) BLOCK -%] 
 [% HTML.escape(content.remove('</?p>')) -%]
 [% END -%]
-   
+[% IF object.type == 'collection' -%]
 <collection xmlns="http://www.loc.gov/MARC21/slim">
 [% FOR object IN objects -%]
   <record>
@@ -49,3 +49,112 @@
   </record>
 [% END -%]
 </collection>
+
+[% ELSIF object.type == 'item' -%]
+<marc:collection xmlns:marc="http://www.loc.gov/MARC21/slim"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://www.loc.gov/MARC21/slim"
+    xmlns:rel="info:fedora/fedora-system:def/relations-external#"
+    xmlns:dcadesc="http://nils.lib.tufts.edu/dcadesc/"
+    xmlns:dcatech="http://nils.lib.tufts.edu/dcatech/"
+    xsi:schemaLocation="http://www.loc.gov/MARC21/slim http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd">
+    [% FOR object IN objects -%]
+    [%# Tests to see if there is a digital object. If so, it creates a record. If not, it skips and moves to next object. Could expand to create item-level MARC records for non-digital items -%]
+[% IF object.digital_objects -%]   
+   <marc:record>
+        <marc:leader>00000nam  2200361Ii 4500</marc:leader>
+        <marc:controlfield tag="006">m||o|d||||</marc:controlfield>
+        <marc:controlfield tag="007">cr||||||||||||</marc:controlfield>
+        <marc:controlfield tag="008">130321s2014\\\\xxu\\\\\om\\\\\\\\\\eng\d</marc:controlfield>
+        <marc:datafield tag="040" ind1=" " ind2=" ">
+            <marc:subfield code="a">TFW</marc:subfield>
+            <marc:subfield code="b">eng</marc:subfield>
+            <marc:subfield code="e">rda</marc:subfield>
+            <marc:subfield code="c">TFW</marc:subfield>
+        </marc:datafield>
+        <marc:datafield tag="042" ind1=" " ind2=" ">
+            <marc:subfield code="a">dc</marc:subfield>
+        </marc:datafield>
+         <marc:datafield tag="100" ind1="1" ind2=" ">
+            [% FOR creator IN object.item_creators -%]<marc:subfield code="a">[% creator.name -%].[% END -%]</marc:subfield>
+        </marc:datafield>
+        <marc:datafield tag="245" ind1="1" ind2="0">
+            <marc:subfield code="a">[% object.title -%]</marc:subfield>
+            [% FOR creator IN object.item_creators -%]
+            <marc:subfield code="c">[% creator.name -%].</marc:subfield>
+            [% END -%]
+        </marc:datafield>
+        <marc:datafield tag="264" ind1=" " ind2="1">
+            <marc:subfield code="c">[% object.date_from -%].</marc:subfield>
+        </marc:datafield>
+        [% FOR digital_object IN object.digital_objects -%]
+        [% IF digital_object.format == "application/pdf" -%]
+        <marc:datafield tag="300" ind1=" " ind2=" ">
+            <marc:subfield code="a">1 online resource.</marc:subfield>
+        </marc:datafield>
+        [% END -%]
+        [% END -%]
+         <marc:datafield tag="336" ind1=" " ind2=" ">
+            <marc:subfield code="a">text</marc:subfield>
+            <marc:subfield code="b">txt</marc:subfield>
+            <marc:subfield code="2">rdacontent</marc:subfield>
+        </marc:datafield>
+        <marc:datafield tag="337" ind1=" " ind2=" ">
+            <marc:subfield code="a">computer</marc:subfield>
+            <marc:subfield code="b">c</marc:subfield>
+            <marc:subfield code="2">rdamedia</marc:subfield>
+        </marc:datafield>
+        <marc:datafield tag="338" ind1=" " ind2=" ">
+            <marc:subfield code="a">online resource</marc:subfield>
+            <marc:subfield code="b">cr</marc:subfield>
+            <marc:subfield code="2">rdacarrier</marc:subfield>
+        </marc:datafield>
+        <marc:datafield tag="500" ind1=" " ind2=" ">
+         [% matches = object.number.match('(\w{5})') -%]
+	    [% coll_no = matches.0 -%]
+            <marc:subfield code="a">UA069.001.DO.[% coll_no -%]</marc:subfield>
+        </marc:datafield>
+         <marc:datafield tag="520" ind1=" " ind2=" ">
+            <marc:subfield code="a">[% object.description -%]</marc:subfield>
+        </marc:datafield>
+         <marc:datafield tag="655" ind1=" " ind2="7">
+            <marc:subfield code="a">Electronic dissertations.</marc:subfield>
+            <marc:subfield code="2">lcgft</marc:subfield>
+        </marc:datafield>
+        <marc:datafield tag="655" ind1=" " ind2="7">
+            <marc:subfield code="a">Tufts dissertations and theses.</marc:subfield>
+            <marc:subfield code="2">local</marc:subfield>
+        </marc:datafield>
+         [% FOR personal_name IN object.item_personal_names -%]
+      	  <marc:datafield tag="600" ind1="1" ind2="0">
+            <marc:subfield code="a">[% personal_name.name -%].</marc:subfield>
+        </marc:datafield>
+      	  [% END -%]
+      
+      	  [% FOR corporate_name IN object.item_corporate_names -%]
+      	  <marc:datafield tag="610" ind1="1" ind2="0">
+            <marc:subfield code="a">[% corporate_name.name -%].</marc:subfield>
+        </marc:datafield>
+      	  [% END -%]
+        [% FOR topic_term IN object.item_topic_terms -%]
+      	  <marc:datafield tag="650" ind1=" " ind2="0">
+            <marc:subfield code="a">[% topic_term.term -%].</marc:subfield>
+        </marc:datafield>
+      	  [% END -%]
+      	  [% FOR geographic_term IN object.item_geographic_terms -%]
+      	  <marc:datafield tag="651" ind1=" " ind2="0">
+            <marc:subfield code="a">[% geographic_term.term -%].</marc:subfield>
+        </marc:datafield>
+      	  [% END -%]
+      <marc:datafield tag="856" ind1="4" ind2="0">
+            <marc:subfield code="u">[% digital_object.permanent_url -%]</marc:subfield>
+        </marc:datafield>
+        
+         </marc:record>
+        
+[% END -%]
+[% END -%] 
+[% END -%]
+</marc:collection>
+
+
