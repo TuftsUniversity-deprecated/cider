@@ -115,7 +115,7 @@
             <marc:subfield code="a">UA069.001.DO.[% coll_no -%]</marc:subfield>
         </marc:datafield>
          <marc:datafield tag="520" ind1=" " ind2=" ">
-            <marc:subfield code="a">[% object.description -%]</marc:subfield>
+            <marc:subfield code="a">[% object.abstract -%]</marc:subfield>
         </marc:datafield>
          <marc:datafield tag="655" ind1=" " ind2="7">
             <marc:subfield code="a">Electronic dissertations.</marc:subfield>
