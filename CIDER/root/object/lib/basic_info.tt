@@ -18,7 +18,7 @@ END;
 </tr>
 <tr>
 <th>Type</th>
-<td>
+<td>[% object.dc_type -%]:   
 [%
 IF object.type == 'item';
     class_formats = [];
