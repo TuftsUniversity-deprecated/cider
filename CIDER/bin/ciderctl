@@ -53,3 +53,91 @@ Daemon::Control->new(
 
     }
 )->run;
+
+=head1 NAME
+
+ciderctl - A simple control script for CIDER
+
+=head1 SYNOPSIS
+
+    $ ciderctl start
+    $ ciderctl restart
+    $ ciderctl stop
+
+    # Or....
+
+    $ ciderctl --config=/path/to/different/config.conf start
+
+    # An example tiny config file, using default values for
+    # most variables.
+
+    $ cat ../conf/ciderctl.conf
+    workers 1
+    port 5001
+
+=head1 DESCRIPTION
+
+This is a simple control script for CIDER. Use it to easily start, stop, or
+restart CIDER's Starman-based daemon process.
+
+=head1 CONFIGURATION
+
+This script looks for a config file in (relative to itself) ../conf/cideradm.conf, but
+it doesn't mind if it doesn't see one there. You can also give it an alternate config
+path via the --config command-line option (see L<"SYNOPSIS">).
+
+It uses sensible defaults for any value not specified in the supplied config file.
+
+Recognized config variables:
+
+=over
+
+=item name
+
+The name of this service.
+
+Default: CIDER
+
+=item desc
+
+The description of this service.
+
+Default: The CIDER archival collection management tool
+
+=item port
+
+The port Starman will listen on.
+
+Default: 5000
+
+=item access_log
+
+The access log.
+
+Default: ../log/access.log
+
+=item stderr
+
+Where STDERR messages should get written.
+
+Default: ../log/error.log
+
+=item pidfile
+
+The pidfile path.
+
+Default: ../run/cider.pid
+
+=item workers
+
+The number of listener processes Starman should launch.
+
+Default: 5
+
+=back
+
+=head1 AUTHOR
+
+Jason McIntosh (jmac@jmac.org) for Tufts University.
+
+
