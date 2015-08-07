@@ -1,0 +1,50 @@
+#!/usr/bin/env perl
+
+use warnings;
+use strict;
+
+use Daemon::Control;
+use Getopt::Long;
+use FindBin;
+use Config::General;
+
+my %options;
+GetOptions( \%options, 'config=s', );
+
+my $config_path = $options{ config } || "$FindBin::Bin/../conf/ciderctl.conf";
+unless ( -r $config_path ) {
+    die "ERROR: Can't read config file at $config_path:$!\n";
+}
+
+my %config = Config::General->new( $config_path )->getall;
+
+$config{name}       ||= 'CIDER';
+$config{desc}       ||= 'The CIDER archival collection management tool';
+$config{port}       ||= 5000;
+$config{access_log} ||= "$FindBin::Bin/../log/access_log";
+$config{stderr}     ||= "$FindBin::Bin/../log/error_log";
+$config{pidfile}    ||= "$FindBin::Bin/../run/cider.pid";
+$config{workers}    ||= 5;
+
+Daemon::Control->new(
+    {
+        name      => $config{name},
+        lsb_start => '$syslog $remote_fs',
+        lsb_stop  => '$syslog',
+        lsb_sdesc => $config{name},
+        lsb_desc  => $config{desc},
+
+        program      => 'starman',
+        program_args => [ '--workers', $config{workers},
+			  '--port', $config{port},
+			  '--access-log', $config{access_log},
+			  "$FindBin::Bin/../cider.psgi"
+	    ],
+
+        user  => $config{user} || getlogin || getpwuid($<),
+
+        pid_file    => $config{pidfile},
+        stderr_file => $config{stderr},
+
+    }
+)->run;
