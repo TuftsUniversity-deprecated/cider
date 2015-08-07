@@ -12,11 +12,18 @@ my %options;
 GetOptions( \%options, 'config=s', );
 
 my $config_path = $options{ config } || "$FindBin::Bin/../conf/ciderctl.conf";
-unless ( -r $config_path ) {
-    die "ERROR: Can't read config file at $config_path:$!\n";
+if (
+    ( $options{ config } && not( -r $config_path ) )
+    ||
+    ( -e $config_path && not( -r $config_path ) )
+) {
+    die "ERROR: Can't read config file at $config_path: $!\n";
 }
 
-my %config = Config::General->new( $config_path )->getall;
+my %config;
+if ( -e $config_path ) {
+    %config = Config::General->new( $config_path )->getall;
+}
 
 $config{name}       ||= 'CIDER';
 $config{desc}       ||= 'The CIDER archival collection management tool';
