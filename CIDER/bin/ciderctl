@@ -26,6 +26,11 @@ $config{stderr}     ||= "$FindBin::Bin/../log/error.log";
 $config{pidfile}    ||= "$FindBin::Bin/../run/cider.pid";
 $config{workers}    ||= 5;
 
+my %user_config = ();
+foreach ( qw( user group ) ) {
+    $user_config{$_} = $config{$_} if $config{$_};
+}
+
 Daemon::Control->new(
     {
         name      => $config{name},
@@ -41,7 +46,7 @@ Daemon::Control->new(
 			  "$FindBin::Bin/../cider.psgi"
 	    ],
 
-        user  => $config{user} || getlogin || getpwuid($<),
+        %user_config,
 
         pid_file    => $config{pidfile},
         stderr_file => $config{stderr},
