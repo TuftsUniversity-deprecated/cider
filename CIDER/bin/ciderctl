@@ -21,8 +21,8 @@ my %config = Config::General->new( $config_path )->getall;
 $config{name}       ||= 'CIDER';
 $config{desc}       ||= 'The CIDER archival collection management tool';
 $config{port}       ||= 5000;
-$config{access_log} ||= "$FindBin::Bin/../log/access_log";
-$config{stderr}     ||= "$FindBin::Bin/../log/error_log";
+$config{access_log} ||= "$FindBin::Bin/../log/access.log";
+$config{stderr}     ||= "$FindBin::Bin/../log/error.log";
 $config{pidfile}    ||= "$FindBin::Bin/../run/cider.pid";
 $config{workers}    ||= 5;
 
