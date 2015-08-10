@@ -141,6 +141,18 @@ The number of listener processes Starman should launch.
 
 Default: 5
 
+=item user
+
+The name of the user that should own the CIDER process.
+
+Default: CIDER runs under your own ownership.
+
+=item group
+
+The name of the group that should own the CIDER process.
+
+Default: CIDER runs under your own ownership.
+
 =back
 
 =head1 AUTHOR
