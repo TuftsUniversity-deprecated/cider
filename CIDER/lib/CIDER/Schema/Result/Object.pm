@@ -1,9 +1,8 @@
 package CIDER::Schema::Result::Object;
 
-use strict;
-use warnings;
+use Moose;
 
-use base 'DBIx::Class::Core';
+extends 'DBIx::Class::Core';
 use Class::Method::Modifiers qw( around after );
 use List::Util qw( minstr maxstr );
 use Carp qw( croak );
@@ -18,7 +17,7 @@ CIDER::Schema::Result::Object
 
 __PACKAGE__->table( 'object' );
 
- __PACKAGE__->load_components( 'MaterializedPath', 'UpdateFromXML', );
+ __PACKAGE__->load_components( 'UpdateFromXML', );
 
 __PACKAGE__->add_columns(
     id =>
@@ -31,30 +30,6 @@ __PACKAGE__->add_columns(
         { data_type => 'int', is_foreign_key => 1, is_nullable => 1,
           accessor => '_parent',
         },
-    date_from =>
-        { data_type => 'varchar', size => 10,
-          is_nullable => 1,
-          accessor => '_date_from',
-        },
-    date_to =>
-        { data_type => 'varchar', size => 10,
-          is_nullable => 1,
-          accessor => '_date_to',
-        },
-    accession_numbers =>
-        { data_type => 'text',
-          is_nullable => 1,
-        },
-    restriction_summary =>
-        { data_type => 'varchar', size => 4,
-          is_nullable => 1,
-        },
-
-    parent_path => {
-       data_type => 'varchar',
-       size      => 255,
-       is_nullable => 1,
-    },
 );
 
 __PACKAGE__->belongs_to(
@@ -101,21 +76,6 @@ __PACKAGE__->might_have(
     { cascade_update => 0, cascade_delete => 0 }
 );
 
-sub materialized_path_columns {
-    return {
-       parent => {
-          parent_column                => 'parent',
-          parent_fk_column             => 'id',
-          materialized_path_column     => 'parent_path',
-          include_self_in_path         => 0,
-          include_self_in_reverse_path => 1,
-          parent_relationship          => 'parent',
-          children_relationship        => 'objects',
-          full_path                    => 'raw_ancestors',
-          reverse_full_path            => 'raw_descendants',
-       },
-    }
- }
 
 =head2 type_object
 
@@ -163,6 +123,32 @@ __PACKAGE__->many_to_many(
         'object_set_objects',
     'object_set');
 
+__PACKAGE__->has_many(
+  "enclosures",
+  "CIDER::Schema::Result::Enclosure",
+  { "foreign.ancestor" => "self.id" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
+__PACKAGE__->has_many(
+  "holders",
+  "CIDER::Schema::Result::Enclosure",
+  { "foreign.descendant" => "self.id" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
+__PACKAGE__->many_to_many(
+    raw_ancestors =>
+        'holders',
+    'ancestor',
+);
+
+__PACKAGE__->many_to_many(
+    raw_descendants =>
+        'enclosures',
+    'descendant',
+);
+
 __PACKAGE__->add_columns(
     audit_trail =>
         { data_type => 'int', is_foreign_key => 1 },
@@ -173,6 +159,66 @@ __PACKAGE__->belongs_to(
     undef,
     { cascade_delete => 1 }
 );
+
+has derived_fields => (
+    is => 'ro',
+    isa => 'Maybe[CIDER::Schema::Result::ObjectWithDerivedFields]',
+    lazy_build => 1,
+    handles => {
+        date_from => 'earliest',
+        date_to   => 'latest',
+        accession_numbers => 'accession_numbers',
+        restriction_summary => 'restrictions',
+    },
+);
+
+has ddate_from => (
+    is => 'ro',
+    isa => 'Str',
+    default => 'foo',
+);
+
+has ddate_to => (
+    is => 'ro',
+    isa => 'Str',
+    default => 'foo',
+);
+
+has daccession_numbers => (
+    is => 'ro',
+    isa => 'Str',
+    default => 'foo',
+);
+
+has drestriction_summary => (
+    is => 'ro',
+    isa => 'Str',
+    default => 'foo',
+);
+
+sub _build_derived_fields {
+    my $self = shift;
+
+    unless ( $self->in_storage ) {
+        return undef;
+    }
+
+    my $view_rs = $self->result_source->schema
+                 ->resultset( 'ObjectWithDerivedFields::IDBoundView' );
+
+    my $result = $view_rs->search(
+                       {},
+                       { bind => [ $self->id ] },
+                   )
+                 ->single;
+
+    unless ( defined $result ) {
+        $result = $view_rs->new_result( { title => 'None' } );
+    }
+
+    return $result;
+}
+
 
 sub children {
     my $self = shift;
@@ -260,6 +306,8 @@ sub delete {
     $_->delete for ( $self->children,
                      $self->object_set_objects,
                      $self->object_locations,
+                     $self->enclosures,
+                     $self->holders,
                    );
 
     $self->next::method( @_ );
@@ -471,7 +519,7 @@ sub previous_object {
             },
             {
                 rows     => 1,
-                order_by => { -desc => 'me.number' },
+                order_by => { -desc => 'descendant.number' },
                 join     => $type,
             },
         )->single;
@@ -532,39 +580,6 @@ sub siblings {
     );
 }
 
-# Override date_from and date_to to call their item-specific counterparts, if we have
-# an associated item, and this is called as a setter. Attempting to set the dates on
-# any other kind of type-object results in an error.
-sub date_from {
-    my $self = shift;
-
-    if ( @_ ) {
-        if ( my $item = $self->item ) {
-            $item->item_date_from( @_ );
-        }
-        else {
-            croak "You cannot set a from- or to-date on a non-item object.";
-        }
-    }
-
-    return $self->_date_from;
-}
-
-sub date_to {
-    my $self = shift;
-
-    if ( @_ ) {
-        if ( my $item = $self->item ) {
-            $item->item_date_to( @_ );
-        }
-        else {
-            croak "You cannot set a from- or to-date on a non-item object.";
-        }
-    }
-
-    return $self->_date_to;
-}
-
 # If an update caused values to change on an associated item,
 # go ahead and update that item too.
 after 'update' => sub {
@@ -575,6 +590,59 @@ after 'update' => sub {
         }
     }
 };
+
+around 'update' => sub {
+    my $original_method = shift;
+    my $self = shift;
+
+    my $parent_changed = $self->is_column_changed( 'parent' );
+
+    my $result = $self->$original_method( @_ );
+
+    if ( $parent_changed ) {
+        $self->_remove_my_tree;
+        $self->_add_my_tree_to_parent;
+    }
+};
+
+after 'insert' => sub {
+    my $self = shift;
+    my $id = $self->id;
+
+    $self->result_source->storage->dbh->do(
+        "insert into enclosure( ancestor, descendant ) values ( $id, $id )"
+    );
+
+    $self->_add_my_tree_to_parent;
+};
+
+sub _remove_my_tree {
+    my $self = shift;
+    my $id = $self->id;
+    $self->result_source->storage->dbh->do(
+        "DELETE a FROM enclosure AS a
+         JOIN enclosure AS d ON a.descendant = d.descendant
+         LEFT JOIN enclosure AS x
+         ON x.ancestor = d.ancestor AND x.descendant = a.ancestor
+         WHERE d.ancestor = $id AND x.ancestor IS NULL"
+    );
+}
+
+sub _add_my_tree_to_parent {
+    my $self = shift;
+    my $id = $self->id;
+    if ( $self->parent ) {
+        my $parent_id = $self->parent->id;
+        $self->result_source->storage->dbh->do(
+           "INSERT INTO enclosure (ancestor, descendant)
+             SELECT supertree.ancestor, subtree.descendant
+             FROM enclosure AS supertree JOIN enclosure AS subtree
+             WHERE subtree.ancestor = $id
+             AND supertree.descendant = $parent_id"
+        );
+    }
+}
+
 
 =head1 LICENSE
 

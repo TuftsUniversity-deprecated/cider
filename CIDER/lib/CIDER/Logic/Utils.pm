@@ -26,7 +26,7 @@ Readonly our $OBJECT_SKETCH_SEARCH_ATTRIBUTES =>
                   'series',
             ],
             columns => [
-                'me.id', 'me.number', 'me.date_from', 'me.date_to', 'me.parent', 'me.title',
+                'me.id', 'me.number', 'me.parent', 'me.title',
             ],
             +select => [
                 { count => 'item.id', -as => 'items' },

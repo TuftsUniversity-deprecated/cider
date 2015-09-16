@@ -26,7 +26,7 @@ is( $item_1->date_from, '2000-01-01',
 is( $item_2->date_to, '2010-01-01',
     "Item 2's date_to is correct." );
 
-$item_2->date_to( '2011-01' );
+$item_2->item_date_to( '2011-01' );
 $item_2->update;
 
 is( $rs->find( $item_2->id )->date_to,

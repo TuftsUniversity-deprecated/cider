@@ -19,7 +19,7 @@ use DateTime;
 $schema->resultset( 'Item' )->create( {
     number    => 12345,
     title     => 'Test Item 3',
-    date_from => '2000-01-01',
+    item_date_from => '2000-01-01',
 } );
 
 ok( my $obj = $schema->resultset( 'Object' )->find( { number => 12345 } ),
