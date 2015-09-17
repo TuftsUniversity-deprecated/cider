@@ -283,12 +283,7 @@ DROP TABLE IF EXISTS `object`;
 CREATE TABLE `object` (
   `id` integer NOT NULL auto_increment,
   `parent` integer,
-  `date_from` varchar(10),
-  `date_to` varchar(10),
-  `accession_numbers` text,
-  `restriction_summary` varchar(4),
   `number` varchar(255) NOT NULL,
-  `parent_path` varchar(255),
   `title` text NOT NULL,
   `audit_trail` integer NOT NULL,
   INDEX `object_idx_audit_trail` (`audit_trail`),
@@ -986,6 +981,21 @@ CREATE TABLE `digital_object_relationship` (
   PRIMARY KEY (`id`),
   CONSTRAINT `digital_object_relationship_fk_digital_object` FOREIGN KEY (`digital_object`) REFERENCES `digital_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `digital_object_relationship_fk_predicate` FOREIGN KEY (`predicate`) REFERENCES `relationship_predicate` (`id`)
+) ENGINE=InnoDB;
+
+--
+-- Table: `enclosure`
+--
+CREATE TABLE `enclosure` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `ancestor` int(11) NOT NULL,
+  `descendant` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `vessel` (`ancestor`,`descendant`),
+  KEY `vessel_2` (`ancestor`),
+  KEY `descendant` (`descendant`),
+  CONSTRAINT `enclosure_ibfk_1` FOREIGN KEY (`ancestor`) REFERENCES `object` (`id`),
+  CONSTRAINT `enclosure_ibfk_2` FOREIGN KEY (`descendant`) REFERENCES `object` (`id`)
 ) ENGINE=InnoDB;
 
 SET foreign_key_checks=1;
