@@ -9,7 +9,7 @@ use Readonly;
 # Ideally, this should come from the searcher object's doc_max() method.
 Readonly my $BIGNUM => 1000;
 
-Readonly my $PAGE_SIZE => 20;
+Readonly my $PAGE_SIZE => 50;
 
 BEGIN {extends 'Catalyst::Controller::HTML::FormFu'; }
 
