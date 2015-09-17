@@ -684,6 +684,7 @@ elements:
           counter_name: digital_object_count
           model_config:
             empty_rows: 1
+            new_rows_max: 10
           elements: 
             - type: Block
               attributes:
