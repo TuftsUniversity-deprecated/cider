@@ -2,11 +2,14 @@ package CIDER::Controller::Search;
 use Moose;
 use namespace::autoclean;
 
+use Data::Page;
 use Readonly;
 
 # We use $BIGNUM to store a ceiling of desired search results when not using a pager.
 # Ideally, this should come from the searcher object's doc_max() method.
 Readonly my $BIGNUM => 1000;
+
+Readonly my $PAGE_SIZE => 50;
 
 BEGIN {extends 'Catalyst::Controller::HTML::FormFu'; }
 
@@ -36,13 +39,22 @@ sub search :Path :Args(0) :FormConfig {
         # Perform the search.
         my $field = $form->param_value( 'field' );
         my $query = $form->param_value( 'query' );
+        my $current_page = $c->req->params->{ page };
 
         $query = "$field:($query)" unless ( $field eq 'all' );
 
+        my $pager = Data::Page->new;
+        $pager->entries_per_page( $PAGE_SIZE );
+        $pager->current_page( $current_page || 1 );
+        $pager->total_entries( $BIGNUM );
+
         my $hits = $c->model( 'Search' )->search(
-            query => $query,
-            num_wanted => $BIGNUM,
+            query      => $query,
+            num_wanted => $PAGE_SIZE,
+            offset     => $pager->skipped,
         );
+
+        $pager->total_entries( $hits->total_hits );
 
         my @objects;
         while ( my $hit = $hits->next  ) {
@@ -57,6 +69,8 @@ sub search :Path :Args(0) :FormConfig {
         }
         $c->stash->{ objects } = \@objects;
         $c->stash->{ query } = $query;
+        $c->stash->{ field } = $field;
+        $c->stash->{ pager } = $pager;
         $c->stash->{ template } = 'search/results.tt';
 
         # The results page has a create-a-new-set form on it.

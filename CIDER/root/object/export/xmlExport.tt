@@ -9,7 +9,7 @@
            [% IF object.item_creators -%]
            <creators>
             [% FOR creator IN object.item_creators -%]
- 	    <creator><name>[% creator.name -%]</name></creator>
+ 	    <creator><name>[% creator.name | xml -%]</name></creator>
 	    [% END -%]
 	    </creators>
 	    [% END -%]
@@ -36,33 +36,33 @@
             [% IF object.item_personal_names -%]
             <personalNames>
             [% FOR personal_name IN object.item_personal_names -%]
-	    <personalName><name>[% personal_name.name -%]</name></personalName>
+	    <personalName><name>[% personal_name.name | xml -%]</name></personalName>
 	    [% END -%]
 	    </personalNames>
 	    [% END -%]
 	    [% IF object.item_corporate_names -%]
             <corporateNames>
             [% FOR corporate_name IN object.item_corporate_names -%]
-	    <corporateName><name>[% corporate_name.name -%]</name></corporateName>
+	    <corporateName><name>[% corporate_name.name | xml -%]</name></corporateName>
 	    [% END -%]
 	    </corporateNames>
 	    [% END -%]
 	    [% IF object.item_topic_terms -%]
             <topicTerms>
             [% FOR topic_term IN object.item_topic_terms -%]
-	    <topicTerm><name>[% topic_term.term -%]</name></topicTerm>
+	    <topicTerm><name>[% topic_term.term | xml -%]</name></topicTerm>
 	    [% END -%]
 	    </topicTerms>
 	    [% END -%]
 	    [% IF object.item_geographic_terms -%]
             <geographicTerms>
             [% FOR geographic_term IN object.item_geographic_terms -%]
-	    <geographicTerm><name>[% geographic_term.term -%]</name></geographicTerm>
+	    <geographicTerm><name>[% geographic_term.term | xml -%]</name></geographicTerm>
 	    [% END -%]
 	    </geographicTerms>
 	    [% END -%]
 	                [% IF object.description -%]
-            <description>[% object.description -%]</description>
+            <description>[% object.description | xml -%]</description>
             [% END -%]
            [% IF object.volume -%]
            <volume>[% object.volume -%]</volume>
@@ -71,10 +71,10 @@
             <issue>[% object.issue -%]</issue>
             [% END -%]
             [% IF object.abstract -%]
-            <abstract>[% object.abstract -%]</abstract>
+            <abstract>[% object.abstract | xml -%]</abstract>
             [% END -%]
             [% IF object.citation -%]
-            <citation>[% object.citation -%]</citation>
+            <citation>[% object.citation | xml -%]</citation>
             [% END -%]
             <classes>
                [% FOR group IN object.group -%]
@@ -84,7 +84,7 @@
                 <fileFolder action="update">
                 <location>[% file_folder.location -%]</location>
                 [% IF file_folder.notes -%]
-             <notes>[% file_folder.notes -%]</notes>
+             <notes>[% file_folder.notes | xml -%]</notes>
              [% END -%]
                 </fileFolder>
                 [% END -%]
@@ -95,7 +95,7 @@
                 <format>[% container.format -%]</format>
                 [% END -%]
                 [% IF container.notes -%]
-             <notes>[% container.notes -%]</notes>
+             <notes>[% container.notes | xml -%]</notes>
              [% END -%]
                 </container >
                 [% END -%]
@@ -106,7 +106,7 @@
                 <format>[% bound_volume.format -%]</format>
                 [% END -%]
                 [% IF bound_volume.notes -%]
-             <notes>[% bound_volume.notes -%]</notes>
+             <notes>[% bound_volume.notes | xml -%]</notes>
              [% END -%]
              [% IF bound_volume.rights -%]
              <rights>[% bound_volume.rights -%]</rights>
@@ -120,7 +120,7 @@
                       <format>[% three_dimensional_object.format -%]</format>
                     [% END -%]
                     [% IF three_dimensional_object.notes -%]
-                      <notes>[% three_dimensional_object.notes -%]</notes>
+                      <notes>[% three_dimensional_object.notes | xml -%]</notes>
                     [% END -%]
                     [% IF three_dimensional_object.rights -%]
                       <rights>[% three_dimensional_object.rights -%]</rights>
@@ -134,7 +134,7 @@
                      <format>[% audio_visual_media.format -%]</format>
                     [% END -%]
                     [% IF audio_visual_media.notes -%]
-                     <notes>[% audio_visual_media.notes -%]</notes>
+                     <notes>[% audio_visual_media.notes | xml -%]</notes>
                     [% END -%]
                     [% IF audio_visual_media.rights -%]
                      <rights>[% audio_visual_media.rights -%]</rights>
@@ -151,7 +151,7 @@
                       <dimensions>[% document.dimensions -%]</dimensions>
                     [% END -%]
                     [% IF document.notes -%]
-                     <notes>[% document.notes -%]</notes>
+                     <notes>[% document.notes | xml -%]</notes>
                     [% END -%]
                     [% IF document.rights -%]
                      <rights>[% document.rights -%]</rights>
@@ -168,7 +168,7 @@
                       <dimensions>[% physical_image.dimensions -%]</dimensions>
                     [% END -%]
                     [% IF physical_image.notes -%]
-                     <notes>[% physical_image.notes -%]</notes>
+                     <notes>[% physical_image.notes | xml -%]</notes>
                     [% END -%]
                     [% IF physical_image.rights -%]
                      <rights>[% physical_image.rights -%]</rights>
@@ -186,7 +186,7 @@
                 <permanentURL>[% digital_object.permanent_url -%]</permanentURL>
                 [% END -%]
                 [% IF digital_object.notes -%]
-                <notes>[% digital_object.notes -%]</notes>
+                <notes>[% digital_object.notes | xml -%]</notes>
                 [% END -%]
                 [% IF digital_object.rights -%]
                 <rights>[% digital_object.rights -%]</rights>
@@ -218,7 +218,7 @@
                 <date>[% digital_object.stabilization_date -%]</date>
                 <procedure>[% digital_object.stabilization_procedure -%]</procedure>
                 [% IF digital_object.stabilization_notes -%]
-                <notes>[% digital_object.stabilization_notes -%]</notes>
+                <notes>[% digital_object.stabilization_notes | xml -%]</notes>
                 [% END -%]
                 </stabilization>
                 [% END -%]

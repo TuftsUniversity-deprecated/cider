@@ -4,7 +4,14 @@
 <h2>[% page.title %]</h2>
 </div>
 
-<p>Your search query "[% query %]" returned [% objects.size %] objects.</p>
+<p>
+Your search query "[% query %]" returned [% pager.total_entries %] objects.
+
+[% IF pager.last_page > 1 %]
+Objects [% pager.first %] through [% pager.last %]:
+[% END %]
+
+</p>
 
 [%
 context_index = 0;
@@ -16,6 +23,27 @@ FOREACH object = objects;
 END;
 %]
 
+[% IF pager.last_page > 1 %]
+<nav>
+  <ul class="pager">
+    [% IF pager.current_page != pager.first_page %]
+    <li>
+      <a href="[% c.uri_for_action( '/search/search', { query => query, field => field, page => pager.previous_page } ) %]" aria-label="Previous">
+        Previous page
+      </a>
+    </li>
+    [% END %]
+
+    [% IF pager.current_page != pager.last_page %]
+    <li>
+      <a href="[% c.uri_for_action( '/search/search', { query => query, field => field, page => pager.next_page } ) %]" aria-label="Next">
+        Next page
+      </a>
+    </li>
+    [% END %]
+  </ul>
+</nav>
+[% END %]
 
 <div class="well">
 <h3>Create a set</h3>
