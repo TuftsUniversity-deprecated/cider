@@ -454,13 +454,12 @@ sub dates {
 sub children_sketch {
     my $self = shift;
 
-    my $class_rs = $self->objects->search(
-        undef,
-        $OBJECT_SKETCH_SEARCH_ATTRIBUTES,
-    );
+    my $children_rs = $self->result_source->schema
+                    ->resultset( 'ObjectWithDerivedFields::ParentBoundView' )
+                    ->search( {}, { bind => [ $self->id ] } )
+                    ->objects_sketch;
 
-    return $class_rs;
-
+    return $children_rs;
 }
 
 # next_object: Returns the next object in the whole CIDER object hierarchy.

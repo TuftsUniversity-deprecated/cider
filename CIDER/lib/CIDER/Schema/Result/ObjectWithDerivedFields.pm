@@ -29,7 +29,47 @@ __PACKAGE__->add_columns(
   'restrictions' => {
     data_type => 'text',
   },
+  'parent' => {
+    data_type => 'int',
+  },
 );
+
+__PACKAGE__->set_primary_key( 'id' );
+
+__PACKAGE__->belongs_to(
+    parent =>
+        'CIDER::Schema::Result::Object',
+);
+
+__PACKAGE__->has_many(
+    objects =>
+        'CIDER::Schema::Result::Object',
+    'parent',
+    { cascade_update => 0, cascade_delete => 0, join_type => 'left', }
+);
+
+__PACKAGE__->might_have(
+    collection =>
+        'CIDER::Schema::Result::Collection',
+    undef,
+    { cascade_update => 0, cascade_delete => 0 }
+);
+
+__PACKAGE__->might_have(
+    series =>
+        'CIDER::Schema::Result::Series',
+    undef,
+    { cascade_update => 0, cascade_delete => 0 }
+);
+
+__PACKAGE__->might_have(
+    item =>
+        'CIDER::Schema::Result::Item',
+    undef,
+    { cascade_update => 0, cascade_delete => 0 }
+);
+
+
 
 around 'accession_numbers' => sub {
     my $orig = shift;
