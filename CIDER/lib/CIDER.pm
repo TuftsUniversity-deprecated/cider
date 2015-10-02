@@ -58,11 +58,11 @@ __PACKAGE__->config(
 
     encoding => 'utf-8',
 
-
     'Plugin::Session' => {
         flash_to_stash => 1,
         expires => 1000000,
         cookie_expires => 1000000,
+        storage => '__HOME__/run/cider_session',
     },
     stacktrace => {
         verbose => 2,
@@ -72,6 +72,18 @@ __PACKAGE__->config(
             schema => 'CIDERDB',
         },
     },
+
+    template_directory => '__HOME__/root/object/export',
+
+    scheduler => {
+        state_file => '__HOME__/run/cider_scheduler.state',
+    },
+
+    'Model::CIDERDB' => {
+        search_index => '__HOME__/run/cider_index',
+    }
+
+
 );
 
 # Start the application
