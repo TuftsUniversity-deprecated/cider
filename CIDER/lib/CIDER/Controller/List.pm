@@ -25,7 +25,7 @@ sub index :Path :Args(0) {
     my ( $self, $c ) = @_;
 
     my @objects = $c->model( 'CIDERDB' )
-                    ->resultset( 'Object' )
+                    ->resultset( 'ObjectWithDerivedFields::RootView' )
                     ->root_objects_sketch;
 
     $c->stash->{ objects } = \@objects;

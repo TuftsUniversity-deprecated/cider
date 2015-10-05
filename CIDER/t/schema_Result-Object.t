@@ -175,42 +175,34 @@ is( $series->date_to, '2010-01-01', "Parent object has expected date-to." );
 my $older_item = $schema->resultset( 'Item' )->find( 4 );
 my $newer_item = $schema->resultset( 'Item' )->find( 5 );
 
-$older_item->date_from( '1999-01-01' );
+$older_item->item_date_from( '1999-01-01' );
 $older_item->update;
 $older_item->discard_changes;
 $series->discard_changes;
 is ( $series->date_from, '1999-01-01', 'Parent object lowered its date-from floor.');
 
-$newer_item->date_to( '2012-01-01' );
+$newer_item->item_date_to( '2012-01-01' );
 $newer_item->update;
 $series->discard_changes;
 is ( $series->date_to, '2012-01-01', 'Parent object raised its date-to ceiling.');
 
-$older_item->date_from( '2001-01-01' );
+$older_item->item_date_from( '2001-01-01' );
 $older_item->update;
 $series->discard_changes;
 is ( $series->date_from, '2001-01-01', 'Parent object raised its date-from floor.');
 
-$newer_item->date_to( '2011-01-01' );
+$newer_item->item_date_to( '2011-01-01' );
 $newer_item->update;
 $newer_item->discard_changes;
 $series->discard_changes;
 is ( $series->date_to, '2011-01-01', 'Parent object lowered its date-to ceiling.');
 
-$newer_item->date_to( undef );
-$newer_item->date_from( '2022-01-01' );
+$newer_item->item_date_to( undef );
+$newer_item->item_date_from( '2022-01-01' );
 $newer_item->update;
 $series->discard_changes;
 is ( $series->date_to, '2022-01-01', 'Parent object adjusted its date-to to cover a '
                                      . 'child\'s futuristic date-from.' );
-
-#foreach ( $newer_item, $older_item ) {
-#    $_->date_to( undef );
-#    $_->update;
-#}
-#$series->discard_changes;
-#is ( $series->date_to, '2002-01-01',
-#                       'Parent object with date_to-less children does the right thing.');
 
 $newer_item->delete;
 $older_item->delete;

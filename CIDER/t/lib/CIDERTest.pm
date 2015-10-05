@@ -12,7 +12,6 @@ our @EXPORT_OK = qw( elt );
 use FindBin;
 
 $ENV{CIDER_SITE_CONFIG} = "$FindBin::Bin/conf/cider.conf";
-#$ENV{CIDER_DEBUG}       = 0;
 
 use utf8;
 use Carp qw(croak);
@@ -25,7 +24,7 @@ use CIDER::Logic::Indexer;
 # TO DO: get these from the config file?
 my $db_dir    = "$FindBin::Bin/db";
 my $db_file   = "$db_dir/cider.db";
-my $dsn       = "dbi:SQLite:$db_file";
+my $dsn       = "dbi:mysql:cider_test";
 my $index_dir = "$FindBin::Bin/db/index";
 
 sub init_schema {
@@ -38,9 +37,8 @@ sub init_schema {
     }
 
     my $schema = CIDER::Schema->
-        connect( $dsn, '', '', {
-            sqlite_unicode => 1,
-            on_connect_call => 'use_foreign_keys',
+        connect( $dsn, 'root', '', {
+            mysql_enable_utf8 => 1,
         });
 
     # Create the index directory if it doesn't already exist.
@@ -53,7 +51,7 @@ sub init_schema {
     # deployment statements rather than generating them for SQLite.
     # So we have to specify the dir here, even though it actually uses
     # the path in the $dsn to write the SQLite file...
-    $schema->deploy( undef, $db_dir );
+    $schema->deploy( { add_drop_table => 1 }, $db_dir );
 
     $schema->populate(
         'AuditTrail',
@@ -224,18 +222,12 @@ sub init_schema {
     $schema->populate(
         'Object',
         [
-            [qw/id parent number title audit_trail parent_path
-                date_from date_to accession_numbers
-            /],
-            [1, undef, 'n1', 'Test Collection with kids', 1, '1',
-                '2000-01-01', '2010-01-01', '2011.004; 2011.005', ],
-            [2, undef, 'n2', 'Test Collection without kids', 2, '2', ],
-            [3, 1, 'n3', 'Test Series 1', 3, '1/3', '2000-01-01', '2010-01-01',
-                 '2011.004; 2011.005', ],
-            [4, 3, 'n4', 'Test Item 1', 4, '1/3/4',
-             '2000-01-01', '2008-01-01', '2011.004',],
-            [5, 3, 'n5', 'Test Item 2', 5, '1/3/5',
-             '2002-01-01', '2010-01-01', '2011.005',],
+            [qw/id parent number title audit_trail/],
+            [1, undef, 'n1', 'Test Collection with kids', 1, ],
+            [2, undef, 'n2', 'Test Collection without kids', 2, ],
+            [3, 1, 'n3', 'Test Series 1', 3, ],
+            [4, 3, 'n4', 'Test Item 1', 4, ],
+            [5, 3, 'n5', 'Test Item 2', 5, ],
         ]
     );
 
@@ -271,6 +263,23 @@ sub init_schema {
                 '2000-01-01', '2008-01-01'],
             [5, 'Test description.', 1, '2011.005', undef,
                 '2002-01-01', '2010-01-01'],
+        ]
+    );
+
+    $schema->populate(
+        'Enclosure',
+        [
+            [qw/id ancestor descendant/],
+            [1, 1, 1,],
+            [2, 1, 3,],
+            [3, 1, 4,],
+            [4, 1, 5,],
+            [5, 2, 2,],
+            [6, 3, 3,],
+            [7, 3, 4,],
+            [8, 3, 5,],
+            [9, 4, 4,],
+            [10, 5, 5,],
         ]
     );
 

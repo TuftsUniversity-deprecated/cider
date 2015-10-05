@@ -277,6 +277,7 @@ sub update_audit_trail_from_xml_hashref {
 
             my $ts = $log_hr->{ timestamp };
             $ts = DateTime::Format::ISO8601->parse_datetime( $ts );
+            $ts->set_time_zone( 'UTC' );
 
             my $staff_hr = $self->xml_elements_to_hashref(
                 @{ $log_hr->{ staff } } );

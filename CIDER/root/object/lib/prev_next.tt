@@ -1,6 +1,12 @@
 [% PROCESS 'object/lib/context_args.tt' %]
 <div class="object-nextprev">
 
+[%
+IF context_args.context_index == '';
+context_args.context_index = 0;
+END;
+%]
+
 [% IF next_object %]
 <p style="float: right;">
 [% context_args.context_index = context_args.context_index + 1 %]
