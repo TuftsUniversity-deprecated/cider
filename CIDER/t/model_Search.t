@@ -25,7 +25,7 @@ is( $hits->next->{title}, 'Test Item 2', 'Found Test Item 2.' );
 my $item = $schema->resultset( 'Item' )->create( {
     number => 3,
     title => 'Test Item 3',
-    date_from => '2000',
+    item_date_from => '2000',
     dc_type => 1,
 } );
 ok( $item, 'Created Item 3.' );

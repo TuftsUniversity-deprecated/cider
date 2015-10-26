@@ -39,17 +39,6 @@ elements:
         - type: Required
 
     - type: Fieldset
-      legend: Date
-      elements:
-          - type: Label
-            label: From
-            name: date_from
-          - type: Label
-            label: To
-            name: date_to
-
-
-    - type: Fieldset
       legend: Bulk Date
       elements:            
           - type: Text
@@ -71,12 +60,6 @@ elements:
             id: bulk_date_to
             constraint: *Date
 
-    - type: Label
-      label: Restrictions
-      name: restrictions
-      attributes:
-         class: clearfix
-
     - type: Textarea
       label: Description
       name: description
@@ -91,18 +74,6 @@ elements:
       name: notes
       id: notes
         
-    - type: Label
-      label: Extent
-      name: extent
-      attributes:
-         class: clearfix
-
-    - type: Label
-      label: Accession Number(s)
-      name: accession_numbers
-      attributes:
-         class: clearfix
-
     - type: Hidden
       name: parent
 

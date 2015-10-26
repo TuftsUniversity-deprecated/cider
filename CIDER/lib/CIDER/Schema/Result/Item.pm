@@ -192,6 +192,20 @@ __PACKAGE__->many_to_many(
     'name',
 );
 
+__PACKAGE__->has_many(
+  "enclosures",
+  "CIDER::Schema::Result::Enclosure",
+  { "foreign.ancestor" => "self.id" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
+__PACKAGE__->has_many(
+  "holders",
+  "CIDER::Schema::Result::Enclosure",
+  { "foreign.descendant" => "self.id" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
 =head1 METHODS
 
 =head2 type
@@ -313,11 +327,10 @@ sub update_from_xml {
     $self->object->update_from_xml( $elt, $hr );
 
     # Text elements
-
     $self->update_boolean_from_xml_hashref(
         $hr, 'circa' );
     $self->update_dates_from_xml_hashref(
-        $hr, 'date' );
+        $hr, 'item_date', 'date' );
     $self->update_text_from_xml_hashref(
         $hr, 'accession_number' );
     $self->update_text_from_xml_hashref(
@@ -434,134 +447,6 @@ sub accession_numbers {
     my $self = shift;
     return $self->accession_number( @_ );
 }
-
-# On adding or removing this record, update all possibly-affected derived fields on
-# ancestor records.
-after [ qw( insert delete ) ] => sub {
-    my $self = shift;
-
-    $self->_update_derived_fields_of_my_ancestors;
-};
-
-# On changing this record, update all possibly-affected derived fields on
-# ancestor records.
-around 'update' => sub {
-    my $original_method = shift;
-    my $self = shift;
-
-    my $i_had_dirty_columns;
-    if ( $self->get_dirty_columns ) {
-        $i_had_dirty_columns = 1;
-    }
-
-    my $return_value = $self->$original_method( @_ );
-
-    if ( $i_had_dirty_columns ) {
-        $self->_update_derived_fields_of_my_ancestors;
-    }
-};
-
-# _update_derived_fields_of_my_ancesors: For the object record of this item and all its
-# ancestors, recalculate various derived fields, and then update those records.
-# Skips this item's own object record if this item no longer exists in the DB.
-sub _update_derived_fields_of_my_ancestors {
-    my $self = shift;
-
-    my $dbh = $self->result_source->schema->storage->dbh;
-    my $date_range_sth = $dbh->prepare(
-        q{select min(item_date_from) as earliest_date, }
-        . q{max(item_date_from) as latest_date_from, }
-        . q{max(item_date_to) as latest_date_to }
-        . q{from item, object where item.id = object.id }
-        . q{and parent_path like ?} );
-
-    my $restriction_sth = $dbh->prepare(
-        q{select name from item, object, item_restrictions }
-        . q{where item.id = object.id and item.restrictions = item_restrictions.id }
-        . q{and parent_path like ?} );
-
-    my $accession_sth = $dbh->prepare(
-        q{select distinct accession_number from item, object }
-        . q{where item.id = object.id and parent_path like ?} );
-
-    my @objects_to_update = grep { defined } $self->ancestors;
-    if ( $self->in_storage ) {
-        push @objects_to_update, $self;
-    }
-    for my $ancestor ( @objects_to_update ) {
-        $ancestor = $ancestor->object;
-        my $bind_value = $ancestor->parent_path . '%';
-        foreach ( $date_range_sth, $restriction_sth, $accession_sth ) {
-            $_->execute( $bind_value );
-        }
-        my ( $earliest_date, $latest_date_from, $latest_date_to ) = $date_range_sth->fetchrow_array;
-        my $latest_date = undef;
-        if ( $latest_date_from || $latest_date_to ) {
-            if ( !$latest_date_to or $latest_date_from gt $latest_date_to ) {
-                $latest_date = $latest_date_from;
-            }
-            else {
-                $latest_date = $latest_date_to;
-            }
-        }
-
-        $ancestor->_date_from( $earliest_date );
-        $ancestor->_date_to( $latest_date );
-
-        my %seen_accession_numbers;
-        my $accession_rows_ref = $accession_sth->fetchall_arrayref;
-        for my $row_ref ( @$accession_rows_ref ) {
-            if ( defined $row_ref->[0] ) {
-                for my $number ( split /\s*[,;]\s*/, $row_ref->[0] ) {
-                    $seen_accession_numbers{ $number } = 1;
-                }
-            }
-        }
-        my $accession_list = join '; ', keys %seen_accession_numbers;
-        $ancestor->accession_numbers( $accession_list );
-
-        my $row_count = 0;
-        my $restrictions_seen = 0;
-        my $restriction_summary = 'none';
-        while ( my $row_ref = $restriction_sth->fetchrow_arrayref ) {
-            if ( $row_ref->[0] ne 'none' ) {
-                $restrictions_seen++;
-            }
-            $row_count++;
-        }
-        if ( $restrictions_seen > 0 ) {
-            if ( $restrictions_seen == $row_count ) {
-                $restriction_summary = 'all';
-            }
-            else {
-                $restriction_summary = 'some';
-            }
-        }
-        $ancestor->restriction_summary( $restriction_summary );
-
-        $ancestor->update;
-    }
-}
-
-# Modify calls to "date_from" and "date_to" to call either the item-specific date
-# accessors (if called as a setter) or the related object record's derived field
-# (if called as a getter).
-for my $date_method ( qw( date_from date_to ) ) {
-    around $date_method => sub {
-        my $original_method = shift;
-        my $self = shift;
-
-        if ( @_ ) {
-            my $item_method = "item_$date_method";
-            return $self->$item_method( @_ );
-        }
-        else {
-            my $object_method = "_$date_method";
-            return $self->$object_method;
-        }
-    };
-}
-
 
 =head1 LICENSE
 

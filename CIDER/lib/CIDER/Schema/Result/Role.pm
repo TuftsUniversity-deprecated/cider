@@ -31,7 +31,7 @@ __PACKAGE__->set_primary_key("id");
 __PACKAGE__->has_many(
   "user_roles",
   "CIDER::Schema::Result::UserRole",
-  { "foreign.owner" => "self.id" },
+  { "foreign.role_id" => "self.id" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
 

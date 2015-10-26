@@ -39,16 +39,6 @@ elements:
       constraint: Required
 
     - type: Fieldset
-      legend: Date
-      elements:
-          - type: Label
-            label: From
-            name: date_from
-          - type: Label
-            label: To
-            name: date_to
-
-    - type: Fieldset
       legend: Bulk Dates
       elements:
           - type: Text
@@ -69,19 +59,6 @@ elements:
             attributes:
                class: span2
             constraint: *Date
-
-    - type: Label
-      attributes:
-        class: clearfix
-      label: Extent
-      name: extent
-
-    - type: Label
-      
-      label: Restrictions
-      name: restrictions
-      attributes:
-         class: clearfix
 
     - type: Textarea
       label: Scope
@@ -284,12 +261,6 @@ elements:
         label_column: description
         attributes:
           order_by: id
-
-    - type: Label
-      label: Accession Number(s)
-      name: accession_numbers
-      attributes:
-         class: clearfix
 
     - type: Text
       name: permanent_url

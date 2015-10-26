@@ -84,7 +84,7 @@ elements:
             name: circa
 
           - label: From
-            name: date_from
+            name: item_date_from
             attributes:
               class: span2
             constraints:
@@ -95,7 +95,7 @@ elements:
                 message: ISO 8601 date must be YYYY, YYYY-MM, or YYYY-MM-DD
 
           - label: To
-            name: date_to
+            name: item_date_to
             attributes:
               class: span2
             constraint: *Date
@@ -684,6 +684,7 @@ elements:
           counter_name: digital_object_count
           model_config:
             empty_rows: 1
+            new_rows_max: 10
           elements: 
             - type: Block
               attributes:
