@@ -40,7 +40,7 @@ object_id = object.id;
 [% END %]
 
 [%# Display the object's full title, hyperlinked to its CIDER detail page. %]
-<a href="[% c.uri_for( c.controller('Object').action_for('detail'), [ object.get_column('number') ] ) %]">[% object.get_column('number') %] [% object.get_column('title') %] [% object.get_column('earliest') %][% IF object.get_column('latest') %] - [% object.get_column('latest') %][% END %]</a>
+<a href="[% c.uri_for( c.controller('Object').action_for('detail'), [ object.get_column('number') ] ) %]">[% object.get_column('number') %] [% object.get_column('title') %] [% object.get_column('earliest') %][% IF object.get_column('latest') && object.get_column('latest') != object.get_column('earliest') %] - [% object.get_column('latest') %][% END %]</a>
 
 
 <span class="class-labels pull-right">
