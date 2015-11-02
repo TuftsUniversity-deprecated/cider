@@ -27,7 +27,7 @@
 	    [% END -%]
         <restrictions>[% object.restrictions -%]</restrictions>
         [% IF object.embargo_end_date -%]
-                <embargo>[% object.embargo_end_date -%]</embargo>
+                <embargoEndDate>[% object.embargo_end_date -%]</embargoEndDate>
         [% END -%]
         [% IF object.accession_number -%]
         <accessionNumber>[% object.accession_number -%]</accessionNumber>

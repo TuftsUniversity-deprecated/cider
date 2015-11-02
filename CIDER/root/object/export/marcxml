@@ -7,6 +7,49 @@
 [% HTML.escape(content.remove('</?p>')) -%]
 [% END -%]
 
+[% MACRO generate_collectiondate(object)
+      BLOCK;
+        IF object.date_to;
+           IF object.date_to == object.date_from;
+           object.date_from;
+           ELSE;
+           object.date_from _ "-" _ object.date_to; 
+           END;
+       ELSE;
+           "undated";
+	   END;
+	 END;  
+-%]
+[% MACRO generate_collectionbulkdate(object)
+      BLOCK;
+        IF object.bulk_date_to;
+           IF object.bulk_date_to == object.bulk_date_from;
+           object.bulk_date_from;
+           ELSE;
+           object.bulk_date_from _ "-" _ object.bulk_date_to; 
+           END;
+       ELSE;
+           "undated";
+	   END;
+	 END;  
+-%]
+[% MACRO generate_rcrdate(object)
+      BLOCK;
+        IF rcr.date_to;
+           IF rcr.date_to == rcr.date_from;
+           rcr.date_from;
+           ELSE;
+           rcr.date_from _ "-" _ rcr.date_to; 
+           END;
+       ELSIF rcr.date_from;
+            rcr.date_from _ "-present";
+       ELSE;
+           "undated";
+	   END;
+	 END;  
+-%]
+
+
 <marc:collection xmlns:marc="http://www.loc.gov/MARC21/slim"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns="http://www.loc.gov/MARC21/slim"
@@ -40,7 +83,7 @@
         <marc:datafield tag="245" ind1="1" ind2="0">
             <marc:subfield code="a">[% object.title -%]</marc:subfield>
             [% FOR creator IN object.item_creators -%]
-            <marc:subfield code="c">[% creator.name -%].</marc:subfield>
+            <marc:subfield code="c">[% creator.name | xml -%].</marc:subfield>
             [% END -%]
         </marc:datafield>
         <marc:datafield tag="264" ind1=" " ind2="1">
@@ -118,33 +161,93 @@
       <subfield code="e">DACS</subfield>
       <subfield code="c">TFW</subfield>
     </datafield>
-[% FOR rcrs IN object.collection_primary_record_contexts -%]
-[% FOR rcr IN rcrs.record_context -%]
-[% IF rcr.rc_type == 'person' || rcr.rc_type == 'family' -%]
-    <datafield tag="100" ind1="1" ind2=" ">
-      <subfield code="a">[% rcr.name_entry %]</subfield>
+        <datafield tag="041" ind1=" " ind2=" ">
+        [% FOR language IN object.languages -%]<subfield code="a">[% language -%]</subfield> [% END -%]
     </datafield>
-[% ELSE -%]
-    <datafield tag="110" ind1="2" ind2=" ">
-      <subfield code="a">[% rcr.name_entry %]</subfield>
-    </datafield>
-[% END -%]
-[% END -%]
-[% END -%]
+            <datafield tag="099" ind1=" " ind2=" ">
+                <subfield code="a">[% object.number -%]</subfield>
+            </datafield>
+            [% FOR rcrs IN object.collection_primary_record_contexts -%]
+            [% FOR rcr IN rcrs.record_context -%]
+            [% IF rcr.rc_type == 'person' || rcr.rc_type == 'family' -%]
+                <datafield tag="100" ind1="1" ind2=" ">
+                  <subfield code="a">[% rcr.name_entry %]</subfield>
+                  <subfield code="d">[% generate_rcrdate(object) -%]</subfield>
+                </datafield>
+            [% ELSE -%]
+                <datafield tag="110" ind1="2" ind2=" ">
+                  <subfield code="a">[% rcr.name_entry %]</subfield>
+                  <subfield code="d">[% generate_rcrdate(object) -%]</subfield>
+                </datafield>
+            [% END -%]
+            [% END -%]
+            [% END -%]
     <datafield tag="245" ind1="1" ind2="0">
       <subfield code="a">[% object.title %]</subfield>
+      <subfield code="f">[% generate_collectiondate(object) %]</subfield>
+      [% IF object.bulk_date_from -%]<subfield code="g">[% generate_collectionbulkdate(object) -%]</subfield>[% END -%]
     </datafield>
+            <datafield tag="300" ind1=" " ind2=" ">
+                <subfield code="a">[% object.extent -%]</subfield>
+            </datafield>
+            <datafield tag="351" ind1=" " ind2=" ">
+                <subfield code="a">[% object.organization -%]</subfield>
+            </datafield>
     <datafield tag="506" ind1=" " ind2=" ">
-      <subfield code="a">Some records may be restricted. See the DCA's General Policy on Access for more information about access to records, especially official University records.</subfield>
+      <subfield code="a">[% IF object.processing_status == 'minimal' OR object.processing_status == 'partial' -%]
+        This collection may require review before it is available for use. Please contact DCA for further details.
+     [% ELSE -%]   
+        [% IF object.restrictions == 'none' -%]
+            This collection is open for research.
+        [% ELSIF object.restrictions == 'some' -%]
+            This collection contains some restricted material. Specific restrictions are noted in the Detailed Contents List in each series.
+        [% ELSE -%]
+            Access to this collection is restricted. See the DCA's General Policy on Access for more information about access to restricted records.
+        [% END -%]
+     [% END -%]   </subfield>
     </datafield>
     <datafield tag="520" ind1=" " ind2=" ">
       <subfield code="a">[% remove_html(object.scope) %]</subfield>
     </datafield>
+        [% IF object.history -%]
+            <datafield tag="541" ind1=" " ind2=" ">
+                <subfield code="a">[% remove_html(object.history) -%]</subfield>
+            </datafield>
+        [% END -%]
 [% FOR rcrs IN object.collection_primary_record_contexts -%]
 [% FOR rcr IN rcrs.record_context -%]
     <datafield tag="545" ind1=" " ind2=" ">
       <subfield code="a">[% remove_html(rcr.history) %]</subfield>
     </datafield>
+    <datafield tag="555" ind1="1" ind2=" ">
+        <subfield code="a">Finding aid: [% object.permanent_url -%]</subfield>
+    </datafield>
+    
+       [% FOR subject IN object.subjects -%]
+       <datafield tag="6xx" ind1=" " ind2=" ">
+     <subfield code="a">[% subject -%]</subfield>
+     </datafield>
+     [% END -%]
+        [% FOR rcrs IN object.collection_secondary_record_contexts -%]
+            [% FOR rcr IN rcrs.record_context -%]
+            [% IF rcr.rc_type == 'person' || rcr.rc_type == 'family' -%]
+                <datafield tag="700" ind1="1" ind2=" ">
+                  <subfield code="a">[% rcr.name_entry %]</subfield>
+                  <subfield code="d">[% generate_rcrdate(object) -%]</subfield>
+                </datafield>
+            [% ELSE -%]
+                <datafield tag="=710" ind1="2" ind2=" ">
+                  <subfield code="a">[% rcr.name_entry %]</subfield>
+                  <subfield code="d">[% generate_rcrdate(object) -%]</subfield>
+                </datafield>
+            [% END -%]
+            [% END -%]
+            [% END -%]
+    
+            <datafield tag="856" ind1="4" ind2="2">
+                <subfield code="3">[% object.title %]</subfield>
+                <subfield code="u">[% object.permanent_url -%]</subfield>
+            </datafield>
 [% END -%]
 [% END -%]
   </record>

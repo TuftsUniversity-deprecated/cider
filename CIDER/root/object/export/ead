@@ -1,5 +1,5 @@
 [% c.res.content_type = 'application/xml' -%]
-<?xml version="1.0" ?>
+<?xml version="1.0"?>
 
 [% USE date(format = '%Y') -%]
 [% USE HTML -%]
@@ -8,7 +8,7 @@
 
 [%# Preserves <p>s if present in original content -%]
 [% MACRO check_for_p(content)
-      content | html | html_para;
+      content | html | html_para | xml;
 -%]
 
 [%# Generates dates that are single or ranges and adds bulk dates if present -%] 
@@ -68,9 +68,9 @@
     IF series.restrictions == 'none';
     "<accessrestrict>This series is open for research.</accessrestrict>";
     ELSIF series.restrictions == 'some';
-    "<accessrestrict>Some of the records in this series are restricted. See the DCA's General Policy on Access for more information about access to records.</accessrestrict>";
+    "<accessrestrict>This series contains some restricted material. Specific restrictions are noted in the Detailed Contents List.</accessrestrict>";
     ELSE;
-    "<accessrestrict>Access to this series is restricted. See the DCA's General Policy on Access for more information about access to records.</accessrestrict>";
+    "<accessrestrict>Access to this series is restricted. See the DCA's General Policy on Access for more information about access to restricted records.</accessrestrict>";
     END;
     
       END;
@@ -98,6 +98,22 @@
          END;
        END;
 	 "</did>";
+	 "<accessrestrict>";
+	   IF object.restrictions == 'none';
+	    "<p>This material is not restricted.</p>";
+	   ELSIF object.restrictions == '20 years';
+	     "<p>This material is restricted for 20 years from the date of creation.</p>"; 
+	   ELSIF object.restrictions == '75 years';
+	     "<p>This material is restricted for 75 years from the date of creation.</p>";
+	   ELSE;
+	       "<p>This material is restricted due to physical condition.</p>";
+	   END;    
+	 "</accessrestrict>";
+	 IF object.description;
+	   "<scopecontent>";
+	       "<p>$object.description</p>";
+	   "</scopecontent>";
+	 END;  
      IF object.digital_objects;
 	   FOR digital_object IN object.digital_objects;
 	     "<daogrp>";
@@ -124,11 +140,24 @@
       END; 
       
 -%]
+
+[%# Generates processing status variables for use in other areas -%]
+    [% IF collection.processing_status == 'minimal' -%]
+        [% processing_type = "minimal" -%]
+        [% processing_statement = "This collection is minimally processed." -%]
+     [% ELSIF collection.processing_status == 'partial' -%]
+        [% processing_type = "partial" -%]
+        [% processing_statement = "This collection is partially processed." -%]
+     [% ELSIF collection.processing_status == 'restricted' OR collection.processing_status == 'open' -%]
+        [% processing_type = "processed" -%]
+        [% processing_statement = "This collection is processed." -%]
+     [% END -%]
+
 [%# Begin main EAD body -%]	   
 <ead xmlns="http://dca.tufts.edu/schema/ead" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://dca.lib.tufts.edu/schema/ead http://dca.lib.tufts.edu/schema/ead/ead.xsd">
   <eadheader langencoding="en">
 [% FOR collection IN objects -%]
-    <eadid>UA069.001.DO.[% collection.number %]</eadid>
+    <eadid[% IF object.permanent_url -%] url="[% object.permanent_url -%]"[% END -%]>UA069.001.DO.[% collection.number %]</eadid>
     <filedesc>
       <titlestmt>
         <titleproper>[% collection.title -%], [% generate_collectiondate(object) %]</titleproper>
@@ -136,7 +165,7 @@
       <publicationstmt>
         <publisher>Digital Collection and Archives, Tufts University</publisher>
         <address>
-          <addressLine>Medford, MA 02155</addressLine>
+          <addressLine>Tisch Library, 35 Professors Row, Medford, MA 02155</addressLine>
         </address>
         <date>[% date.format %]</date>
       </publicationstmt>
@@ -206,27 +235,34 @@
      [% check_for_p(collection.scope) %]  
    </scopecontent>
 
-   <descgrp type="access_control">
-     <accessrestrict>
-     [% IF collection.restrictions == 'none' -%]
-       <p>This collection is open for research.</p>
-     [% ELSIF collection.restrictions == 'some' -%]
-       <p>Some of the records in this collection are restricted. See the DCA's General Policy on Access for more information about access to records.</p>
-     [% ELSE -%]
-       <p>Access to this collection is restricted. See the DCA's General Policy on Access for more information about access to records.</p>
-     [% END -%]
-     [% IF collection.processing_status == 'minimal' -%]
-     <p>This collection is minimally processed and may not be available for research. Contact the DCA for more information.</p>
+    [%# This block generates processing status values used in accessrestrict and processinfo -%]
+    [% IF collection.processing_status == 'minimal' -%]
+        [% processing_type = "minimal" -%]
+        [% processing_statement = "This collection is minimally processed." -%]
      [% ELSIF collection.processing_status == 'partial' -%]
-     <p>This collection is partially processed. Some materials may be restricted and not available for research. Contact the DCA for more information.</p>
-     [% ELSIF collection.processing_status == 'restricted' -%]
-     <p>This collection is processed, but some materials may be restricted and not available for research. Contact the DCA for more information.</p>
-     [% ELSIF collection.processing_status == 'open' -%]
-     <p>This collection is processed and open for research.</p>
+        [% processing_type = "partial" -%]
+        [% processing_statement = "This collection is partially processed." -%]
+     [% ELSIF collection.processing_status == 'restricted' OR collection.processing_status == 'open' -%]
+        [% processing_type = "processed" -%]
+        [% processing_statement = "This collection is processed." -%]
      [% END -%]
+     
+   <descgrp type="access_control">
+     <accessrestrict type="[% processing_type -%]">
+     [% IF collection.processing_status == 'minimal' OR collection.processing_status == 'partial' -%]
+        <p>This collection may require review before it is available for use. Please contact DCA for further details.</p>
+     [% ELSE -%]   
+        [% IF collection.restrictions == 'none' -%]
+            <p>This collection is open for research.</p>
+        [% ELSIF collection.restrictions == 'some' -%]
+            <p>This collection contains some restricted material. Specific restrictions are noted in the Detailed Contents List in each series.</p>
+        [% ELSE -%]
+            <p>Access to this collection is restricted. See the DCA's General Policy on Access for more information about access to restricted records.</p>
+        [% END -%]
+     [% END -%]   
      </accessrestrict>
      <userestrict>
-       <p>Some material may be copyrighted or restricted. It is the patron's obligation to determine and satisfy copyright or other case restrictions when publishing or otherwise distributing materials found in the collections. Please see the DCA's policy on Copyright and Fair Use for more information.</p>
+       <p>Some material in this collection may be protected by copyright and other rights. Please see DCA's policy on Copyright and Fair Use for more information about reproductions and permissions to publish.</p>
      </userestrict>
   </descgrp>
 
@@ -254,12 +290,15 @@
      [% check_for_p(collection.history) %]
    </acqinfo>
    [% END -%]
-
-   [% IF collection.processing_notes -%]
-   <processinfo>   
+    
+   
+   <processinfo>
+      <p>[% processing_statement -%]</p>  
+     [% IF collection.processing_notes -%]
      [% check_for_p(collection.processing_notes) %]
+     [% END -%]
    </processinfo>
-   [% END -%]   
+     
 
    <dsc type="combined">
      
@@ -307,5 +346,4 @@
 [% END -%]
 </ead>  
 
- 
     

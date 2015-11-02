@@ -9,46 +9,60 @@
         xmlns:admin="http://nils.lib.tufts.edu/dcaadmin/" xmlns:ac="http://purl.org/dc/dcmitype/"
         xmlns:rel="info:fedora/fedora-system:def/relations-external#">
         <admin:steward>dca</admin:steward>
-        <admin:displays>dl</admin:displays>
         <admin:createdby>CIDER</admin:createdby>
+        
 [% IF object.type == 'item' -%]
+
 [%# If there are multiple digital object class instances, you
     need to extract the PID to be the Fedora object ID. Otherwise
     there is a PID at the top level of the group. -%]
   [% IF object.digital_objects.pid -%]
     [% pid = object.digital_objects.pid -%]
+    [% IF ! pid.match('tufts:(.*)') -%]
+        <!-- WARNING there is a problem with the pid. Please review -->
+        [% END -%]
   [% ELSE -%]
 	 [% FOR digital_object IN object.digital_objects -%]
-    [% IF digital_object.pid -%]
-      [% pid = digital_object.pid -%]
-      [% BREAK -%]
-    [% END -%]
-      <!-- We should never reach here unless there is a problem with the PID -->
-   [% END -%]
-  [% END -%]
-        <pid>[% pid -%]</pid>
-        [% matches = pid.match('tufts:(.*)') -%]
-        [% FOR digital_object IN object.digital_objects -%]
-        <file>[% matches.0 -%].archival[% digital_object.file_extension -%]</file>
+        [% IF digital_object.pid -%]
+            [% pid = digital_object.pid -%]
+            [% IF ! pid.match('tufts:(.*)') -%]
+                <!-- WARNING there is a problem with the pid. Please review -->
+            [% END -%]
+        [% BREAK -%]
         [% END -%]
+        
+      <!-- WARNING there is a problem with the pid. Please review -->
+    [% END -%]
+  [% END -%]
+  
+    [%# Sets displays-in element for ingest into MIRA. Throws warning if object is restricted but listed as going into the TDL. -%]
+            [% FOR digital_object IN object.digital_objects -%]
+            [% IF digital_object.location == 'data05' OR digital_object.location == 'data01' -%]
+                [% IF object.restrictions == '20 years' OR object.restrictions == '75 years' -%]
+                <!-- WARNING this object is restricted and cannot go into the TDL. Please review -->
+                [% END -%]
+            [% END -%]    
+            [% IF digital_object.location == 'darkarchive' -%]
+            <admin:displays>dark</admin:displays>
+            [% ELSIF digital_object.location == 'data05' OR 'data01' -%]
+            <admin:displays>dl</admin:displays>
+            [% END -%]
+            [% LAST -%]
+            [% END -%]
+            
+        
+        <pid>[% pid -%]</pid>
+       
         <dc:title>[% object.title -%]</dc:title>
+        
         [% FOR creator IN object.item_creators -%]
  	    <dc:creator>[% creator.name -%]</dc:creator>
 	    [% END -%]
-        [% USE physImgSpec=String('') -%]
-        [% FOR physical_image IN object.physical_images -%]
-        [% IF physical_image.dimensions -%]
-    	  [% CALL physImgSpec.append(physical_image.dimensions,', ') -%]
-    	  [% END -%]
-    	  [% IF physical_image.format -%]
-    	  [% CALL physImgSpec.append(physical_image.format, '. ') -%]
-    	  [% END -%]
-    	  [% END -%]
-	  	  [% IF object.abstract OR object.volume OR object.issue OR object.description OR object.circa OR physImgSpec -%]
-	      <dc:description>[% IF object.circa -%]This date is approximate. [% END -%][% IF object.volume AND object.issue -%]Volume [% object.volume -%], Issue [% object.issue -%]. [% ELSIF object.volume AND NOT object.issue -%]Volume [% object.volume -%]. [% ELSIF object.issue AND NOT object.volume -%]Issue [% object.issue -%]. [% END -%][% IF physImgSpec.length -%][% physImgSpec -%][% END -%][% IF object.description -%][% object.description -%] [% END -%][% IF object.abstract -%] Abstract: [% object.abstract -%][% END -%]</dc:description>
-	      [% END -%]
+	    
         <dc:publisher>Tufts University. Digital Collections and Archives.</dc:publisher>
-        [% matches = object.number.match('(\w{5})') -%]
+              
+	    
+	    [% matches = object.number.match('(\w{5})') -%]
 	    [% coll_no = matches.0 -%]
 	    <dc:source>[% coll_no -%]</dc:source>
 	    [% IF object.date_from -%]
@@ -56,16 +70,15 @@
       	  [% END -%]      
       	<dc:date.available>[% object.audit_trail.date_created -%]</dc:date.available>
       	<dc:date.issued>[% date.format -%]</dc:date.issued>
-        <dc:type>[% object.dc_type -%]</dc:type>
-        [% FOR digital_object IN object.digital_objects -%]
-	    [% IF digital_object.format -%]
-           <!-- If there are multiple digital object class instances, verify that this is the right format. -->
-	    <dc:format>[% digital_object.format -%]</dc:format>
-	     [% BREAK -%]
-	    [% END -%]
-	    [% END -%]
-       
-        [% FOR personal_name IN object.item_personal_names -%]
+	    
+	    [% IF digital_object.rights -%]
+	     <dc:rights>[% digital_object.rights -%]</dc:rights>
+	     [% ELSE -%]
+	     <!-- CHANGE RIGHTS URL IF NEEDED -->
+	     <dc:rights>http://dca.tufts.edu/ua/access/rights.html</dc:rights>
+	     [% END -%]
+	    
+	    [% FOR personal_name IN object.item_personal_names -%]
       	  <dcadesc:persname>[% personal_name.name -%]</dcadesc:persname>
       	  [% END -%]
       
@@ -80,79 +93,266 @@
       	  [% FOR topic_term IN object.item_topic_terms -%]
       	  <dcadesc:subject>[% topic_term.term -%]</dcadesc:subject>
       	  [% END -%]
-        
-         [% IF digital_object.rights -%]
-	     <dc:rights>[% digital_object.rights -%]</dc:rights>
-	     [% ELSE -%]
-	     <!-- CHANGE RIGHTS URL IF NEEDED -->
-	     <dc:rights>http://dca.tufts.edu/ua/access/rights.html</dc:rights>
-	     [% END -%]
-         
-         [% FOREACH digital_object IN object.digital_objects -%]
-      	   [% IF digital_object.permanent_url -%]
-          <!-- If there are multiple digital object class instances, verify that this is the right handle. -->
-          [% handle_present = 'yes' -%]
-      	  <dc:identifier>[% digital_object.permanent_url -%]</dc:identifier>
-      	    [% LAST -%]
-      	   [% END -%]
-      	   [% END -%]
-
-	     [% IF digital_object.permanent_URL -%]
-         <dc:identifier>[% digital_object.permanent_URL -%]</dc:identifier>
+	    [% IF object.embargo_end_date -%]
+        <embargo>[% object.embargo_end_date -%]</embargo>
         [% END -%]
+	    
+	    
+	    
+        [% USE physImgSpec=String('') -%]
+            [% FOR physical_image IN object.physical_images -%]
+                [% IF physical_image.dimensions -%]
+    	           [% CALL physImgSpec.append(physical_image.dimensions,', ') -%]
+    	        [% END -%]
+    	        [% IF physical_image.format -%]
+    	           [% CALL physImgSpec.append(physical_image.format, '. ') -%]
+    	        [% END -%]
+    	    [% END -%]
+    	 [% USE docSpec=String('') -%]
+            [% FOR document IN object.documents -%]
+                [% IF document.dimensions -%]
+                   [% CALL docSpec.append(document.dimensions,', ') -%]
+                [% END -%]
+                [% IF document.format -%]
+                   [% CALL docSpec.append(document.format, '. ') -%]
+                [% END -%]
+            [% END -%]     
+    	  [% USE boundVolSpec=String('') -%]
+    	  [% FOR bound_volume IN object.bound_volumes -%]
+    	       [% IF bound_volume.format -%]
+    	           [% CALL boundVolSpec.append(bound_volume.format,'. ') -%]
+               [% END -%]
+          [% END -%]
+    	  [% USE AVSpec=String('') -%]
+    	  [% FOR audio_visual_media IN object.audio_visual_media -%]
+    	       [% IF audio_visual_media.format -%]
+    	           [% CALL AVSpec.append(audio_visual_media.format,'. ') -%]
+               [% END -%]
+          [% END -%]
+    	  
+	  	  [% IF object.abstract OR object.volume OR object.issue OR object.description OR object.circa OR physImgSpec OR docSpec OR boundVolSpec OR AVSpec -%]
+    	      <dc:description>[% IF object.circa -%]This date is approximate. [% END -%][% IF object.volume AND object.issue -%]Volume [% object.volume -%], Issue [% object.issue -%]. [% ELSIF object.volume AND NOT object.issue -%]Volume [% object.volume -%]. [% ELSIF object.issue AND NOT object.volume -%]Issue [% object.issue -%]. [% END -%][% IF physImgSpec.length -%][% physImgSpec -%][% END -%][% IF docSpec.length -%][% docSpec -%][% END -%][% IF boundVolSpec.length -%][% boundVolSpec -%][% END -%][% IF AVSpec.length -%][% AVSpec -%][% END -%][% IF object.description -%][% object.description -%] [% END -%][% IF object.abstract -%] Abstract: [% object.abstract -%][% END -%]</dc:description>
+    	      [% END -%]
+        
+        [% FOREACH digital_object IN object.digital_objects -%]
+    	       [% IF digital_object.location == 'darkarchive' -%]
+    	       <dcterms:accessRights>[% IF object.restrictions == 'none' -%]Personal reference use only.[% ELSE -%]Restricted for [% object.restrictions -%] from date of creation.[% END -%]</dcterms:accessRights>
+    	       [% matches = digital_object.pid.match('tufts:(.*)') -%]
+    	       [% IF digital_object.checksum -%]<dc:description>File name: [% matches.0 -%][% digital_object.file_extension -%] Md5 checksum: [% digital_object.checksum -%]</dc:description>[% END -%]
+    	       [% IF digital_object.notes -%]<dc:description>File name: [% matches.0 -%][% digital_object.file_extension -%] Admin notes: [% digital_object.notes -%]</dc:description>[% END -%]
+    	       [% IF digital_object.stabilized_by -%]<dc:description>File name: [% matches.0 -%][% digital_object.file_extension -%] Stabilization notes: Performed by [% digital_object.stabilized_by -%] on [% digital_object.stabilization_date -%] according to [% digital_object.stabilization_procedure -%]. [% digital_object.stabilization_notes -%]</dc:description>[% END -%]
+    	       [% IF digital_object.toc -%]<dc:description>File name: [% matches.0 -%][% digital_object.file_extension -%] Table of contents: [% digital_object.toc -%]</dc:description>[% END -%]
+    	       [% IF digital_object.checksum_app OR digital_object.media_app OR digital_object.virus_app OR digital_object.other_apps -%]<dc:description>File name: [% matches.0 -%][% digital_object.file_extension -%] Checksum tool: [% digital_object.checksum_app -%]. Virus Scan tool: [% digital_object.virus_app -%]. Media Image tool: [% digital_object.media_app -%]. [% IF digital_object.other_apps -%]Other tools: [% FOR other_app IN digital_object.other_apps -%][% other_app -%], [% END -%][% END -%]</dc:description>[% END -%]
+    	       [% END -%]
+    	       
+    	  [% END -%] 
+        
+        
         [% IF object.citation -%]
       	  <dc:bibliographicCitation>[% object.citation -%]</dc:bibliographicCitation>
       	  [% END -%]
-        
-        [% IF object.embargo_end_date -%]
-        <embargo>[% object.embargo_end_date -%]</embargo>
-        [% END -%]
-      
       
         <rel:itemID>oai:[% pid -%]</rel:itemID>
         [% FOR digital_object IN object.digital_objects -%]
 	           [% FOR relationship IN digital_object.digital_object_relationships -%]
-	           <[% relationship.predicate -%]>[% relationship.pid -%]</[% relationship.predicate-%]>
+	               [% UNLESS relationship.predicate == 'fedora-model:hasModel' -%]
+	                   <[% relationship.predicate -%]>[% relationship.pid -%]</[% relationship.predicate -%]>
+	               [% END -%]
 	           [% END -%]
-	       [% END -%]
+	           [% IF ! digital_object.digital_object_relationships -%]
+	               <!-- WARNING this object does not have any relationships defined. Please review. -->
+	           [% END -%]
+	           [% LAST -%]
+	    [% END -%]
 	         
-	  
+	    [%# This section throws warnings if key pieces do not exist - #%]     
+	    [% FOR digital_object IN object.digital_objects -%]      
+	         [% IF ! digital_object.format  -%]
+                <!-- WARNING no digital object format has been defined. Please review. -->
+             [% END -%]
+             [% IF ! digital_object.file_extension  -%]
+                <!-- WARNING no digital object file extension has been defined. Please review. -->
+             [% END -%]
+         [% END -%]
+	         
+	         
+	    [%# The following SWITCH section makes choices about digital object format(s), ingest file name(s), fedora model type, and existing handle(s), based first on dc:type, then on other criteria including digital object format and file extensions. If there is metadata missing, throws a warning. -%] 
 	    [% SWITCH object.dc_type -%]
-	    [% CASE 'Image' -%]
-	    <rel:hasModel>info:fedora/cm:Image.4DS</rel:hasModel>
+	    
+	     [% CASE 'Image' -%]
+	     <!-- Image - match with dc:type-->
+	     <dc:type>[% object.dc_type -%]</dc:type>
+	     <rel:hasModel>info:fedora/cm:Image.4DS</rel:hasModel>
+                [% FOR digital_object IN object.digital_objects -%]
+                        [% IF digital_object.format -%]
+                            <!-- If there are multiple digital object class instances, verify that this is the right format. -->
+	                        <dc:format>[% digital_object.format -%]</dc:format>
+	                    [% END -%]
+                        [% matches = pid.match('tufts:(.*)') -%]
+                         [%# This string builds the file name. Only one binary file can be imported. -%]
+                        [% IF digital_object.file_extension -%]
+                            <file>[% matches.0 -%].archival[% digital_object.file_extension -%]</file>
+                        [% ELSIF digital_object.format == 'image/tiff' -%]
+                            <file>[% matches.0 -%].archival.tif</file>
+                        [% ELSIF digital_object.format == 'image/jpeg' OR digital_object.format == 'image/jpg' -%]
+                            <file>[% matches.0 -%].archival.jpg</file>
+                        [% ELSE -%]    
+                            <file>[% matches.0 -%].archival.WARNING</file>
+                        [% END -%]
+                        [% IF digital_object.permanent_url -%]
+                         <!-- If there are multiple digital object class instances, verify that this is the right handle. -->
+                            [% handle_present = 'yes' -%]
+      	                    <dc:identifier>[% digital_object.permanent_url -%]</dc:identifier>
+      	                [% END -%]
+      	                
+	                    [% LAST -%]
+                    [% END -%]
+       
 	    [% CASE 'Text' -%]
-            [% IF digital_object.format == 'application/msword' or digital_object.format == 'application/vnd.ms-powerpoint' -%]
-                <!-- Use if we are preserving the transfer version of the file but do not want it publicly accessible. Erin is unsure if this is correct: -->
-            <rel:hasModel>info:fedora/cm:Text.PDF</rel:hasModel>    
-            [% ELSIF digital_object.format == 'application/tei+xml' or digital_object.format == 'text/xml' -%]
-                <!-- For TEI documents. -->
-             <rel:hasModel>info:fedora/cm:Text.TEI</rel:hasModel>
-            [% ELSE -%]
-                <!-- If we are preserving and making accessible only a pdf of the object. -->
-              <rel:hasModel>info:fedora/cm:Text.PDF</rel:hasModel>  
-        [% END -%]
+	     <!-- Text - match with dc:type -->
+         <dc:type>[% object.dc_type -%]</dc:type>
+	        [% FOR digital_object IN object.digital_objects -%]
+	             [% text_transfer_binary = 'true' -%]
+	               [% IF digital_object.format == 'application/tei+xml' or digital_object.format == 'text/xml' -%]
+	                  [% text_transfer_binary = 'false' -%]
+	                  [% text_format = digital_object.format -%]
+	                  [% text_extension = digital_object.file_extension -%]
+	                  [% text_model = 'info:fedora/cm:Text.TEI' -%]
+	               [% ELSIF digital_object.format == 'application/pdf' -%]   
+	                  [% text_transfer_binary = 'false' -%]
+	                  [% text_format = digital_object.format -%]
+	                  [% text_extension = '.pdf' -%]
+	                  [% text_model = 'info:fedora/cm:Text.PDF' -%]
+	               [% ELSIF digital_object.format == 'image/tiff' OR digital_object.format == 'image/jpg' -%]
+	                  [% text_transfer_binary = 'false' -%]
+	                  [% text_format = digital_object.format -%]
+	                  [% text_extension = digital_object.file_extension -%]
+	                  [% text_model = 'info:fedora/cm:Image.4DS' -%]
+	               [% ELSE -%]
+	                  [% text_format = digital_object.format -%]
+	                  [% text_extension = digital_object.file_extension -%]
+	                  [% text_model = 'info:fedora/cm:Text.PDF' -%]
+	               [% END -%]
+	               [% IF digital_object.permanent_url -%]
+                        <!-- If there are multiple digital object class instances, verify that this is the right handle. -->
+      	                <dc:identifier>[% digital_object.permanent_url -%]</dc:identifier>      
+	               [% END -%]
+	          [% END -%]     
+	            [% matches = pid.match('tufts:(.*)') -%]
+	            [% IF text_transfer_binary == 'false' -%]
+	               <rel:hasModel>[% text_model -%]</rel:hasModel>
+	               <!-- If there are multiple digital object class instances, verify that this is the right format. -->
+	               <dc:format>[% text_format -%]</dc:format>
+	               <file>[% matches.0 -%].archival[% text_extension -%]</file>
+	            [% ELSE -%]   
+	               <rel:hasModel>[% text_model -%]</rel:hasModel>
+	               <!-- If there are multiple digital object class instances, verify that this is the right format. -->
+	               <dc:format>[% text_format -%]</dc:format>
+	               <file datastream="Transfer.binary">[% matches.0 -%].transfer[% text_extension -%]</file>
+                   <file datastream="Archival.pdf">[% matches.0 -%].archival.pdf</file>
+	            [% END -%]
+        
+        
         [% CASE 'Sound' -%]
-        <!-- this logic is not robust. -->
+        <!-- Sound - match with dc:type -->
+         <dc:type>[% object.dc_type -%]</dc:type> 
+        [%# For audio and video with transcript template assumes there are 2 catalogued class instances: the audio/video, and the transcript. If there are more or fewer the template may not work properly.-%]
         [% FOR digital_object IN object.digital_objects -%]
             [% audio_with_transcript = 'false' -%]
              [% IF digital_object.format == 'text/xml' -%]
-              [% audio_with_transcript = 'true' -%]
-              [% transcript_extension = '.xml' -%]
+               [% audio_with_transcript = 'true' -%]
+               [% transcript_extension = '.xml' -%]
              [% ELSIF digital_object.format == 'application/tei+xml' -%]
-              [% audio_with_transcript = 'true' -%]
-              [% transcript_extension = '.tei' -%]
+               [% audio_with_transcript = 'true' -%]
+               [% transcript_extension = '.tei' -%]
+             [% ELSIF digital_object.format == 'audio/wav' -%]
+               [% audio_extension = '.wav' -%]
+               [% audio_format = 'audio/wav' -%]
+             [% ELSIF digital_object.format == 'audio/aiff' -%]
+               [% audio_extension = '.aif' -%]
+               [% audio_format = 'audio/aiff' -%]
+             [% ELSIF digital_object.format == 'audio/mp3' -%]
+               [% audio_extension = '.mp3' -%]
+               [% audio_format = 'audio/mp3' -%]
 	         [% ELSE -%]
-              [% extension = digital_object.file_extension -%]
-	        [% END -%]
+               [% audio_extension = digital_object.file_extension -%]
+               [% audio_format = digital_object.format -%]
+	         [% END -%]
+	         [% IF digital_object.permanent_url -%]
+               <!-- If there are multiple digital object class instances, verify that this is the right handle. -->
+      	       <dc:identifier>[% digital_object.permanent_url -%]</dc:identifier>      
 	       [% END -%]
-             [% IF audio_with_transcript == 'true' -%]
-             <rel:hasModel>info:fedora/cm:Audio.OralHistory</rel:hasModel> 
-            [% ELSE -%]
+	     [% END -%]  
+         [% matches = pid.match('tufts:(.*)') -%]
+         [% IF audio_with_transcript == 'true' -%]
+             <dc:format>[% audio_format -%]</dc:format>
+             <rel:hasModel>info:fedora/cm:Audio</rel:hasModel>
+             <file datastream="ARCHIVAL_WAV">[% matches.0 -%].archival[% audio_extension -%]</file>
+             <file datastream="ARCHIVAL_XML">[% matches.0 -%].archival[% transcript_extension -%]</file>
+         [% ELSE -%]
+            <dc:format>[% audio_format -%]</dc:format>
             <rel:hasModel>info:fedora/cm:Audio</rel:hasModel> 
-       [% END -%]
+            <file datastream="ARCHIVAL_WAV">[% matches.0 -%].archival[% audio_extension -%]</file>
+         [% END -%]
+                     
+      
+       
+       [% CASE 'MovingImage' -%]
+        <!-- Moving Image - match with dc:type -->
+        [%# For audio and video with transcript template assumes there are 2 catalogued class instances: the audio/video, and the transcript. If there are more or fewer the template may not work properly.-%]
+       <dc:type>[% object.dc_type -%]</dc:type> 
+        [% FOR digital_object IN object.digital_objects -%]
+            [% video_with_transcript = 'false' -%]
+             [% IF digital_object.format == 'text/xml' -%]
+               [% video_with_transcript = 'true' -%]
+               [% transcript_extension = '.xml' -%]
+             [% ELSIF digital_object.format == 'application/tei+xml' -%]
+               [% video_with_transcript = 'true' -%]
+               [% transcript_extension = '.tei' -%]
+             [% ELSIF digital_object.format == 'application/mp4' -%]
+               [% video_extension = '.mp4' -%]
+               [% video_format = 'application/mp4' -%]
+	         [% ELSE -%]
+               [% video_extension = digital_object.file_extension -%]
+               [% video_format = digital_object.format -%]
+	         [% END -%]
+	         [% IF digital_object.permanent_url -%]
+               <!-- If there are multiple digital object class instances, verify that this is the right handle. -->
+      	       <dc:identifier>[% digital_object.permanent_url -%]</dc:identifier>      
+	         [% END -%]
+	     [% END -%]  
+         [% matches = pid.match('tufts:(.*)') -%]
+         [% IF video_with_transcript == 'true' -%]
+             <dc:format>[% video_format -%]</dc:format>
+             <rel:hasModel>info:fedora/cm:TuftsVideo</rel:hasModel>
+             <file datastream="Archival.video">[% matches.0 -%].archival[% video_extension -%]</file>
+             <file datastream="ARCHIVAL_XML">[% matches.0 -%].archival[% transcript_extension -%]</file>
+         [% ELSE -%]
+            <dc:format>[% video_format -%]</dc:format>
+            <rel:hasModel>info:fedora/cm:TuftsVideo</rel:hasModel> 
+            <file datastream="Archival.video">[% matches.0 -%].archival[% video_extension -%]</file>
+         [% END -%]
+       
+        
+        
+       [% CASE 'Collection' -%]
+        <!-- Collection - Described/managed in aggregate -->
+            <dc:type>[% object.dc_type -%]</dc:type> 
+            <rel:hasModel>info:fedora/cm:generic</rel:hasModel>
+           
+            [% FOREACH digital_object IN object.digital_objects -%]
+            <dc:format>[% digital_object.format -%]</dc:format>
+            [%# This string builds the file name. -%]
+             [% matches = digital_object.pid.match('tufts:(.*)') -%]
+            <file>[% matches.0 -%].archival[% digital_object.file_extension -%]</file>
+            [% END -%]
+       
+
         [% END -%]
         
+        
 [% ELSIF object.type == 'collection' -%]
+        <admin:displays>dl</admin:displays>
         <pid>tufts:UA069.001.DO.[% object.number -%]</pid>
         <file>UA069.001.DO.[% object.number -%].archival.xml</file>
         <dc:title>[% object.title -%]</dc:title>
