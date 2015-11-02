@@ -6,10 +6,154 @@
 [% MACRO remove_html(content) BLOCK -%] 
 [% HTML.escape(content.remove('</?p>')) -%]
 [% END -%]
-   
-<collection xmlns="http://www.loc.gov/MARC21/slim">
+
+[% MACRO generate_collectiondate(object)
+      BLOCK;
+        IF object.date_to;
+           IF object.date_to == object.date_from;
+           object.date_from;
+           ELSE;
+           object.date_from _ "-" _ object.date_to; 
+           END;
+       ELSE;
+           "undated";
+	   END;
+	 END;  
+-%]
+[% MACRO generate_collectionbulkdate(object)
+      BLOCK;
+        IF object.bulk_date_to;
+           IF object.bulk_date_to == object.bulk_date_from;
+           object.bulk_date_from;
+           ELSE;
+           object.bulk_date_from _ "-" _ object.bulk_date_to; 
+           END;
+       ELSE;
+           "undated";
+	   END;
+	 END;  
+-%]
+[% MACRO generate_rcrdate(object)
+      BLOCK;
+        IF rcr.date_to;
+           IF rcr.date_to == rcr.date_from;
+           rcr.date_from;
+           ELSE;
+           rcr.date_from _ "-" _ rcr.date_to; 
+           END;
+       ELSIF rcr.date_from;
+            rcr.date_from _ "-present";
+       ELSE;
+           "undated";
+	   END;
+	 END;  
+-%]
+
+
+<marc:collection xmlns:marc="http://www.loc.gov/MARC21/slim"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://www.loc.gov/MARC21/slim"
+    xmlns:rel="info:fedora/fedora-system:def/relations-external#"
+    xmlns:dcadesc="http://nils.lib.tufts.edu/dcadesc/"
+    xmlns:dcatech="http://nils.lib.tufts.edu/dcatech/"
+    xsi:schemaLocation="http://www.loc.gov/MARC21/slim http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd">
 [% FOR object IN objects -%]
-  <record>
+    [% IF object.type == 'item' -%]
+    [%# Tests to see if there is a digital object. If so, it creates a record. If not, it skips and moves to next object. Could expand to create item-level MARC records for non-digital items -%]
+        [% IF object.digital_objects -%]   
+   <marc:record>
+        <marc:leader>00000nam  2200361Ii 4500</marc:leader>
+        <marc:controlfield tag="006">m||o|d||||</marc:controlfield>
+        <marc:controlfield tag="007">cr||||||||||||</marc:controlfield>
+        <marc:controlfield tag="008">130321s2014\\\\xxu\\\\\om\\\\\\\\\\eng\d</marc:controlfield>
+        <marc:datafield tag="040" ind1=" " ind2=" ">
+            <marc:subfield code="a">TFW</marc:subfield>
+            <marc:subfield code="b">eng</marc:subfield>
+            <marc:subfield code="e">rda</marc:subfield>
+            <marc:subfield code="c">TFW</marc:subfield>
+        </marc:datafield>
+        <marc:datafield tag="042" ind1=" " ind2=" ">
+            <marc:subfield code="a">dc</marc:subfield>
+        </marc:datafield>
+         <marc:datafield tag="100" ind1="1" ind2=" ">
+            [% FOR creator IN object.item_creators -%]
+            <marc:subfield code="a">[% creator.name -%].</marc:subfield>
+            [% END -%]
+        </marc:datafield>
+        <marc:datafield tag="245" ind1="1" ind2="0">
+            <marc:subfield code="a">[% object.title -%]</marc:subfield>
+            [% FOR creator IN object.item_creators -%]
+            <marc:subfield code="c">[% creator.name | xml -%].</marc:subfield>
+            [% END -%]
+        </marc:datafield>
+        <marc:datafield tag="264" ind1=" " ind2="1">
+            <marc:subfield code="c">[% object.date_from -%].</marc:subfield>
+        </marc:datafield>
+        <marc:datafield tag="300" ind1=" " ind2=" ">
+            <marc:subfield code="a">1 online resource.</marc:subfield>
+        </marc:datafield>
+         <marc:datafield tag="336" ind1=" " ind2=" ">
+            <marc:subfield code="a">text</marc:subfield>
+            <marc:subfield code="b">txt</marc:subfield>
+            <marc:subfield code="2">rdacontent</marc:subfield>
+        </marc:datafield>
+        <marc:datafield tag="337" ind1=" " ind2=" ">
+            <marc:subfield code="a">computer</marc:subfield>
+            <marc:subfield code="b">c</marc:subfield>
+            <marc:subfield code="2">rdamedia</marc:subfield>
+        </marc:datafield>
+        <marc:datafield tag="338" ind1=" " ind2=" ">
+            <marc:subfield code="a">online resource</marc:subfield>
+            <marc:subfield code="b">cr</marc:subfield>
+            <marc:subfield code="2">rdacarrier</marc:subfield>
+        </marc:datafield>
+        <marc:datafield tag="500" ind1=" " ind2=" ">
+            [% matches = object.number.match('(\w{5})') -%]
+	        [% coll_no = matches.0 -%]
+            <marc:subfield code="a">UA069.001.DO.[% coll_no -%]</marc:subfield>
+        </marc:datafield>
+         <marc:datafield tag="520" ind1=" " ind2=" ">
+            <marc:subfield code="a">[% object.abstract -%]</marc:subfield>
+        </marc:datafield>
+         <marc:datafield tag="655" ind1=" " ind2="7">
+            <marc:subfield code="a">Electronic dissertations.</marc:subfield>
+            <marc:subfield code="2">lcgft</marc:subfield>
+        </marc:datafield>
+        <marc:datafield tag="655" ind1=" " ind2="7">
+            <marc:subfield code="a">Tufts dissertations and theses.</marc:subfield>
+            <marc:subfield code="2">local</marc:subfield>
+        </marc:datafield>
+            [% FOR personal_name IN object.item_personal_names -%]
+      	  <marc:datafield tag="600" ind1="1" ind2="0">
+            <marc:subfield code="a">[% personal_name.name -%].</marc:subfield>
+          </marc:datafield>
+      	    [% END -%]
+      	    [% FOR corporate_name IN object.item_corporate_names -%]
+      	  <marc:datafield tag="610" ind1="1" ind2="0">
+            <marc:subfield code="a">[% corporate_name.name -%].</marc:subfield>
+        </marc:datafield>
+      	    [% END -%]
+            [% FOR topic_term IN object.item_topic_terms -%]
+      	  <marc:datafield tag="650" ind1=" " ind2="0">
+            <marc:subfield code="a">[% topic_term.term -%].</marc:subfield>
+        </marc:datafield>
+      	    [% END -%]
+      	    [% FOR geographic_term IN object.item_geographic_terms -%]
+      	  <marc:datafield tag="651" ind1=" " ind2="0">
+            <marc:subfield code="a">[% geographic_term.term -%].</marc:subfield>
+        </marc:datafield>
+      	    [% END -%]
+        <marc:datafield tag="856" ind1="4" ind2="0">
+            <marc:subfield code="u">[% digital_object.permanent_url -%]</marc:subfield>
+        </marc:datafield>
+     </marc:record>
+        [% END -%] 
+        
+        [% ELSIF object.type == 'series' -%]
+           <marc:record></marc:record>
+       
+        [% ELSIF object.type == 'collection' -%]
+        <record>
     <leader>99999ntc         ia </leader>
     <controlfield tag="008">040320u9999    xx            000 0 eng d</controlfield>
     <datafield tag="040" ind1=" " ind2=" ">
@@ -17,35 +161,100 @@
       <subfield code="e">DACS</subfield>
       <subfield code="c">TFW</subfield>
     </datafield>
-[% FOR rcrs IN object.collection_primary_record_contexts -%]
-[% FOR rcr IN rcrs.record_context -%]
-[% IF rcr.rc_type == 'person' || rcr.rc_type == 'family' -%]
-    <datafield tag="100" ind1="1" ind2=" ">
-      <subfield code="a">[% rcr.name_entry %]</subfield>
+        <datafield tag="041" ind1=" " ind2=" ">
+        [% FOR language IN object.languages -%]<subfield code="a">[% language -%]</subfield> [% END -%]
     </datafield>
-[% ELSE -%]
-    <datafield tag="110" ind1="2" ind2=" ">
-      <subfield code="a">[% rcr.name_entry %]</subfield>
-    </datafield>
-[% END -%]
-[% END -%]
-[% END -%]
+            <datafield tag="099" ind1=" " ind2=" ">
+                <subfield code="a">[% object.number -%]</subfield>
+            </datafield>
+            [% FOR rcrs IN object.collection_primary_record_contexts -%]
+            [% FOR rcr IN rcrs.record_context -%]
+            [% IF rcr.rc_type == 'person' || rcr.rc_type == 'family' -%]
+                <datafield tag="100" ind1="1" ind2=" ">
+                  <subfield code="a">[% rcr.name_entry %]</subfield>
+                  <subfield code="d">[% generate_rcrdate(object) -%]</subfield>
+                </datafield>
+            [% ELSE -%]
+                <datafield tag="110" ind1="2" ind2=" ">
+                  <subfield code="a">[% rcr.name_entry %]</subfield>
+                  <subfield code="d">[% generate_rcrdate(object) -%]</subfield>
+                </datafield>
+            [% END -%]
+            [% END -%]
+            [% END -%]
     <datafield tag="245" ind1="1" ind2="0">
       <subfield code="a">[% object.title %]</subfield>
+      <subfield code="f">[% generate_collectiondate(object) %]</subfield>
+      [% IF object.bulk_date_from -%]<subfield code="g">[% generate_collectionbulkdate(object) -%]</subfield>[% END -%]
     </datafield>
+            <datafield tag="300" ind1=" " ind2=" ">
+                <subfield code="a">[% object.extent -%]</subfield>
+            </datafield>
+            <datafield tag="351" ind1=" " ind2=" ">
+                <subfield code="a">[% object.organization -%]</subfield>
+            </datafield>
     <datafield tag="506" ind1=" " ind2=" ">
-      <subfield code="a">Some records may be restricted. See the DCA's General Policy on Access for more information about access to records, especially official University records.</subfield>
+      <subfield code="a">[% IF object.processing_status == 'minimal' OR object.processing_status == 'partial' -%]
+        This collection may require review before it is available for use. Please contact DCA for further details.
+     [% ELSE -%]   
+        [% IF object.restrictions == 'none' -%]
+            This collection is open for research.
+        [% ELSIF object.restrictions == 'some' -%]
+            This collection contains some restricted material. Specific restrictions are noted in the Detailed Contents List in each series.
+        [% ELSE -%]
+            Access to this collection is restricted. See the DCA's General Policy on Access for more information about access to restricted records.
+        [% END -%]
+     [% END -%]   </subfield>
     </datafield>
     <datafield tag="520" ind1=" " ind2=" ">
       <subfield code="a">[% remove_html(object.scope) %]</subfield>
     </datafield>
+        [% IF object.history -%]
+            <datafield tag="541" ind1=" " ind2=" ">
+                <subfield code="a">[% remove_html(object.history) -%]</subfield>
+            </datafield>
+        [% END -%]
 [% FOR rcrs IN object.collection_primary_record_contexts -%]
 [% FOR rcr IN rcrs.record_context -%]
     <datafield tag="545" ind1=" " ind2=" ">
       <subfield code="a">[% remove_html(rcr.history) %]</subfield>
     </datafield>
+    <datafield tag="555" ind1="1" ind2=" ">
+        <subfield code="a">Finding aid: [% object.permanent_url -%]</subfield>
+    </datafield>
+    
+       [% FOR subject IN object.subjects -%]
+       <datafield tag="6xx" ind1=" " ind2=" ">
+     <subfield code="a">[% subject -%]</subfield>
+     </datafield>
+     [% END -%]
+        [% FOR rcrs IN object.collection_secondary_record_contexts -%]
+            [% FOR rcr IN rcrs.record_context -%]
+            [% IF rcr.rc_type == 'person' || rcr.rc_type == 'family' -%]
+                <datafield tag="700" ind1="1" ind2=" ">
+                  <subfield code="a">[% rcr.name_entry %]</subfield>
+                  <subfield code="d">[% generate_rcrdate(object) -%]</subfield>
+                </datafield>
+            [% ELSE -%]
+                <datafield tag="=710" ind1="2" ind2=" ">
+                  <subfield code="a">[% rcr.name_entry %]</subfield>
+                  <subfield code="d">[% generate_rcrdate(object) -%]</subfield>
+                </datafield>
+            [% END -%]
+            [% END -%]
+            [% END -%]
+    
+            <datafield tag="856" ind1="4" ind2="2">
+                <subfield code="3">[% object.title %]</subfield>
+                <subfield code="u">[% object.permanent_url -%]</subfield>
+            </datafield>
 [% END -%]
 [% END -%]
   </record>
+        [% END -%]
+
+    
+
 [% END -%]
-</collection>
+    
+   </marc:collection>

@@ -1,8 +1,32 @@
 [% c.res.content_type = 'application/xml' -%]
 <?xml version="1.0" ?>
 <import>
-[% IF object.type =='item' -%]
+
+  
+
 [% FOR object IN objects -%]
+[% IF object.type =='item' -%]
+[%# If there are multiple digital object class instances, you
+    need to extract the PID to be the Fedora object ID. Otherwise
+    there is a PID at the top level of the group. -%]
+  [% IF object.digital_objects.pid -%]
+    [% pid = object.digital_objects.pid -%]
+    [% IF ! pid.match('tufts:(.*)') -%]
+        <!-- WARNING there is a problem with the pid. Please review -->
+        [% END -%]
+  [% ELSE -%]
+	 [% FOR digital_object IN object.digital_objects -%]
+        [% IF digital_object.pid -%]
+            [% pid = digital_object.pid -%]
+            [% IF ! pid.match('tufts:(.*)') -%]
+                <!-- WARNING there is a problem with the pid. Please review -->
+            [% END -%]
+        [% BREAK -%]
+        [% END -%]
+        
+      <!-- WARNING there is a problem with the pid. Please review -->
+    [% END -%]
+  [% END -%]
   <update>
     <item number="[% object.number %]" parent="[% object.parent.number %]">
 	<title>[% object.title -%]</title>
@@ -10,13 +34,27 @@
       <classes>
         <digitalObject action ="update">
 	  <location>data05</location>
-	  <pid>tufts:[% object.number %]</pid>
+	  <pid>[% pid -%]</pid>
+	  [% IF object.digital_objects.permanent_url -%]
+                <permanentURL>[% object.digital_objects.permanent_url -%]</permanentURL>
+        [% ELSE -%]       
 	  <permanentURL>PUTHANDLEHERE</permanentURL>
+	   [% END -%]
+	  <relationships>
+        <relationship predicate="fedora-model:hasModel">
+            <pid>PUTMODELHERE</pid>
+        </relationship>
+        [% FOR relationship IN object.digital_objects.digital_object_relationships -%]
+                   <relationship predicate="[% relationship.predicate -%]">
+                   <pid>[% relationship.pid -%]</pid>
+                   </relationship>
+                [% END -%]
+      </relationships>
 	</digitalObject>
       </classes>
     </item>
   </update>
-[% END -%]
+
 [% ELSE -%]
     <update>
         <collection number="[% object.number -%]">
@@ -29,5 +67,6 @@
         <pid>tufts:UA069.001.DO.[% object.number -%]</pid>
         </collection>
     </update>
+    [% END -%]
     [% END -%]
 </import>
