@@ -1,5 +1,5 @@
 [% c.res.content_type = 'application/xml' -%]
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 
 [% USE date(format = '%Y') -%]
 [% USE HTML -%]
@@ -8,7 +8,7 @@
 
 [%# Preserves <p>s if present in original content -%]
 [% MACRO check_for_p(content)
-      content | html | html_para | xml;
+      content | html | html_para;
 -%]
 
 [%# Generates dates that are single or ranges and adds bulk dates if present -%] 
@@ -100,13 +100,13 @@
 	 "</did>";
 	 "<accessrestrict>";
 	   IF object.restrictions == 'none';
-	    "<p>This material is not restricted.</p>";
+	    "<p>Open for research.</p>";
 	   ELSIF object.restrictions == '20 years';
-	     "<p>This material is restricted for 20 years from the date of creation.</p>"; 
+	     "<p>20 years from the date of creation.</p>"; 
 	   ELSIF object.restrictions == '75 years';
-	     "<p>This material is restricted for 75 years from the date of creation.</p>";
+	     "<p>75 years from the date of creation.</p>";
 	   ELSE;
-	       "<p>This material is restricted due to physical condition.</p>";
+	       "<p>Physical condition.</p>";
 	   END;    
 	 "</accessrestrict>";
 	 IF object.description;
@@ -305,33 +305,28 @@
  [% IF collection.number_of_children > 0 -%]
      [% FOR series IN collection.children -%]
        [% IF series.type == 'series' -%]
-     <c01 level="series" id="[% series.number %]">
+        <c01 level="series" id="[% series.number %]">
          [% generate_series(series) %]       
-       [% IF series.number_of_children > 0 -%]
-          [% FOR child IN series.children -%]
-            [% IF child.type == 'series' -%]
-              <c02 level="subseries" id="[% child.number %]">
-                [% generate_series(child) %] 
-		[% IF child.number_of_children > 0 -%]
-		  [% FOR item IN child.children -%]
-		  [% IF item.file_folders; type = "file"; ELSE; type = "item"; END; -%]
+            [% IF series.number_of_children > 0 -%]
+                [% FOR child IN series.children -%]
+                    [% IF child.type == 'series' -%]
+                        <c02 level="subseries" id="[% child.number %]">
+                        [% generate_series(child) %] 
+		                [% IF child.number_of_children > 0 -%]
+		                      [% FOR item IN child.children -%]
+		                      [% IF item.file_folders; type = "file"; ELSE; type = "item"; END; -%]
 		
-		  [% generate_item(item, type, 3) %]
-	        
-                  [% END -%]
-                [% END -%]
-              </c02>
-
-           [% ELSIF child.type == 'item' -%]
-	     [% IF child.file_folders; type = "file"; ELSE; type = "item"; END; -%]
-	      
-	        [% generate_item(child, type, 2) %]
-            
-             
+		                          [% generate_item(item, type, 3) %]
+                              [% END -%]    
+                        [% END -%]
+                       </c02>
+                    [% ELSIF child.type == 'item' -%]
+	                   [% IF child.file_folders; type = "file"; ELSE; type = "item"; END; -%]
+	                       [% generate_item(child, type, 2) %]
+                       [% END -%]
+                    [% END -%]
            [% END -%]
-         [% END -%]
-        [% END -%]
-       </c01>
+        </c01>
        [% END -%]
 
     [% END -%] [%# for each top-level child %]

@@ -35,11 +35,19 @@
         <digitalObject action ="update">
 	  <location>data05</location>
 	  <pid>[% pid -%]</pid>
-	  [% IF object.digital_objects.permanent_url -%]
+	  [% FOR digital_object IN object.digital_objects -%]
+            [% IF digital_object.location == 'data05' OR digital_object.location == 'data01' -%]
+	           [% IF object.digital_objects.permanent_url -%]
                 <permanentURL>[% object.digital_objects.permanent_url -%]</permanentURL>
-        [% ELSE -%]       
-	  <permanentURL>PUTHANDLEHERE</permanentURL>
-	   [% END -%]
+               [% ELSE -%]
+	            <permanentURL>PUTHANDLEHERE</permanentURL>
+	           [% END -%]
+	           [% BREAK -%]
+	        [% ELSIF digital_object.location == 'darkarchive' -%]
+	           <permanentURL>https://darkarchive.lib.tufts.edu/</permanentURL>
+	        [% END -%]
+	        [% BREAK -%]
+	  [% END -%]      
 	  <relationships>
         <relationship predicate="fedora-model:hasModel">
             <pid>PUTMODELHERE</pid>

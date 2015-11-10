@@ -197,7 +197,7 @@
                         [% ELSIF digital_object.format == 'image/jpeg' OR digital_object.format == 'image/jpg' -%]
                             <file>[% matches.0 -%].archival.jpg</file>
                         [% ELSE -%]    
-                            <file>[% matches.0 -%].archival.WARNING</file>
+                            <file>[% matches.0 -%].archival.[% digital_object.file_extension -%]</file>
                         [% END -%]
                         [% IF digital_object.permanent_url -%]
                          <!-- If there are multiple digital object class instances, verify that this is the right handle. -->
@@ -218,12 +218,12 @@
 	                  [% text_format = digital_object.format -%]
 	                  [% text_extension = digital_object.file_extension -%]
 	                  [% text_model = 'info:fedora/cm:Text.TEI' -%]
-	               [% ELSIF digital_object.format == 'application/pdf' -%]   
+	               [% ELSIF digital_object.format == 'application/pdf' -%] 
 	                  [% text_transfer_binary = 'false' -%]
 	                  [% text_format = digital_object.format -%]
 	                  [% text_extension = '.pdf' -%]
 	                  [% text_model = 'info:fedora/cm:Text.PDF' -%]
-	               [% ELSIF digital_object.format == 'image/tiff' OR digital_object.format == 'image/jpg' -%]
+	               [% ELSIF digital_object.format == 'image/tiff' OR digital_object.format == 'image/jpg' OR digital_object.format == 'image/gif' -%]
 	                  [% text_transfer_binary = 'false' -%]
 	                  [% text_format = digital_object.format -%]
 	                  [% text_extension = digital_object.file_extension -%]
