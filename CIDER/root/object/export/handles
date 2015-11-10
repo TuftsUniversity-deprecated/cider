@@ -33,7 +33,7 @@
     <restrictions>[% object.restrictions -%]</restrictions>
       <classes>
         <digitalObject action ="update">
-	  <location>data05</location>
+	  <location>[% digital_object.location -%]</location>
 	  <pid>[% pid -%]</pid>
 	  [% FOR digital_object IN object.digital_objects -%]
             [% IF digital_object.location == 'data05' OR digital_object.location == 'data01' -%]
