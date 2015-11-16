@@ -340,6 +340,8 @@ stabilizationProcedure =
 
 unitType =
   "1.20 cubic ft."
+| "2.40 cubic ft."
+| "3.60 cubic ft."
 | "0.55 cubic ft."
 | "0.50 cubic ft."
 | "0.40 cubic ft."
