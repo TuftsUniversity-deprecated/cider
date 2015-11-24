@@ -54,8 +54,9 @@
         <relationship predicate="fedora-model:hasModel">
             <pid>PUTMODELHERE</pid>
         </relationship>
-        [% FOR relationship IN object.digital_objects.digital_object_relationships -%]
-        [% IF relationship.pid -%]
+        [% FOR digital_object IN object.digital_objects -%]
+            [% FOR relationship IN digital_object.digital_object_relationships -%]
+                   [% IF relationship.pid -%]
                         [% relspid = relationship.pid -%]
                         [% IF ! relspid.match('tufts:(.*)') -%]
                         <!-- WARNING there is a problem with the Relationship pid. Please review -->
@@ -64,7 +65,8 @@
                    <relationship predicate="[% relationship.predicate -%]">
                    <pid>[% relationship.pid -%]</pid>
                    </relationship>
-                [% END -%]
+            [% END -%]
+        [% END -%]
       </relationships>
 	</digitalObject>
       </classes>
