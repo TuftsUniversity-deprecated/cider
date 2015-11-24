@@ -136,7 +136,7 @@
         
         [% FOREACH digital_object IN object.digital_objects -%]
     	       [% IF digital_object.location == 'darkarchive' -%]
-    	       <dcterms:accessRights>[% IF object.restrictions == 'none' -%]Personal reference use only.[% ELSE -%]Restricted for [% object.restrictions -%] from date of creation.[% END -%]</dcterms:accessRights>
+    	       <dcterms:accessRights>[% IF object.restrictions == 'none' -%]Mediated access only. Check collection documentation for specific restrictions.[% ELSE -%]Restricted for [% object.restrictions -%] from date of creation.[% END -%]</dcterms:accessRights>
     	       [% matches = digital_object.pid.match('tufts:(.*)') -%]
     	       [% IF digital_object.checksum -%]<dc:description>File name: [% matches.0 -%][% digital_object.file_extension -%] Md5 checksum: [% digital_object.checksum -%]</dc:description>[% END -%]
     	       [% IF digital_object.notes -%]<dc:description>File name: [% matches.0 -%][% digital_object.file_extension -%] Admin notes: [% digital_object.notes -%]</dc:description>[% END -%]
@@ -155,6 +155,12 @@
         <rel:itemID>oai:[% pid -%]</rel:itemID>
         [% FOR digital_object IN object.digital_objects -%]
 	           [% FOR relationship IN digital_object.digital_object_relationships -%]
+	               [% IF relationship.pid -%]
+                        [% relspid = relationship.pid -%]
+                        [% IF ! relspid.match('tufts:(.*)') -%]
+                        <!-- WARNING there is a problem with the Relationship pid. Please review -->
+                        [% END -%]
+                   [% END -%]     
 	               [% UNLESS relationship.predicate == 'fedora-model:hasModel' -%]
 	                   <[% relationship.predicate -%]>[% relationship.pid -%]</[% relationship.predicate -%]>
 	               [% END -%]

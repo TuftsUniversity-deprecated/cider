@@ -1,5 +1,5 @@
 [% c.res.content_type = 'application/xml' -%]
-<?xml version="1.0" ?>
+<?xml-model href="http://dca.lib.tufts.edu/schema/cider/cider-import.rng" type="application/xml" schematypens="http://relaxng.org/ns/structure/1.0"?>
 <import>
 
   
@@ -33,7 +33,9 @@
     <restrictions>[% object.restrictions -%]</restrictions>
       <classes>
         <digitalObject action ="update">
+          [% FOR digital_object IN object.digital_objects -%]
 	  <location>[% digital_object.location -%]</location>
+	  [% END -%]
 	  <pid>[% pid -%]</pid>
 	  [% FOR digital_object IN object.digital_objects -%]
             [% IF digital_object.location == 'data05' OR digital_object.location == 'data01' -%]
@@ -53,6 +55,12 @@
             <pid>PUTMODELHERE</pid>
         </relationship>
         [% FOR relationship IN object.digital_objects.digital_object_relationships -%]
+        [% IF relationship.pid -%]
+                        [% relspid = relationship.pid -%]
+                        [% IF ! relspid.match('tufts:(.*)') -%]
+                        <!-- WARNING there is a problem with the Relationship pid. Please review -->
+                        [% END -%]
+                   [% END -%]
                    <relationship predicate="[% relationship.predicate -%]">
                    <pid>[% relationship.pid -%]</pid>
                    </relationship>
