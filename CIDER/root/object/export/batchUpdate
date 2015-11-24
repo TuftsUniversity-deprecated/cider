@@ -106,7 +106,7 @@
 
 [% FOR digital_object IN object.digital_objects -%]
     	       [% IF digital_object.location == 'darkarchive' -%]
-    	       <dcterms:accessRights>[% IF object.restrictions == 'none' -%]Personal use only [% ELSE -%]Restricted for [% object.restrictions -%][% END -%]</dcterms:accessRights>
+    	       <dcterms:accessRights>[% IF object.restrictions == 'none' -%]Mediated access only. Check collection documentation for specific restrictions.[% ELSE -%]Restricted for [% object.restrictions -%][% END -%]</dcterms:accessRights>
     	       [% IF digital_object.checksum -%]<dc:description>Md5 checksum: [% digital_object.checksum -%]</dc:description>[% END -%]
     	       [% IF digital_object.notes -%]<dc:description>Admin notes: [% digital_object.notes -%]</dc:description>[% END -%]
     	       [% IF digital_object.stabilized_by -%]<dc:description>Stabilization notes: Performed by [% digital_object.stabilized_by -%] on [% digital_object.stabilization_date -%] according to [% digital_object.stabilization_procedure -%]. [% digital_object.stabilization_notes -%]</dc:description>[% END -%]
