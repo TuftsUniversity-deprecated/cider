@@ -127,7 +127,9 @@
        </datastream>    
        <datastream id="RELS-EXT">
             <rdf:RDF xmlns:ns0="info:fedora/fedora-system:def/relations-external#" xmlns:ns1="info:fedora/fedora-system:def/model#" xmlns:ns2="http://www.openarchives.org/OAI/2.0/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rel="info:fedora/fedora-system:def/relations-external#">
-                <rdf:Description rdf:about="info:fedora/[% pid -%]"/>
+                [% draftMatches = pid.match('tufts:(.*)') -%]
+
+                <rdf:Description rdf:about="info:fedora/draft:[% draftMatches.0 -%]">
                     <ns2:itemID>oai:[% pid %]</ns2:itemID>
                     [% FOR digital_object IN object.digital_objects -%]
 	                   [% FOR relationship IN digital_object.digital_object_relationships -%]
@@ -159,6 +161,7 @@
 	                   [% END -%]
 	                   [% LAST -%]
 	                [% END -%]
+	            </rdf:Description>    
 	         </rdf:RDF>
 	      </datastream>  
     </digitalObject>    
