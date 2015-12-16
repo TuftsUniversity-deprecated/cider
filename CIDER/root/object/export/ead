@@ -14,19 +14,32 @@
 [%# Generates dates that are single or ranges and adds bulk dates if present -%] 
 [% MACRO generate_unitdate(object)
       BLOCK;
+      
         "<unitdate type=\"inclusive\">" _ object.date_from;
         IF object.date_to;
            IF object.date_to == object.date_from;
            "</unitdate>";
            ELSE;
-	  "-" _ object.date_to _ "</unitdate>";
-	  END;
-	ELSE;
-	  "</unitdate>"; 
-	END;
-        IF object.bulk_date_from;
-          "<unitdate type=\"bulk\">" _ object.bulk_date_from _ "-" _ object.bulk_date_to _ "</unitdate>";
+           "-" _ object.date_to _ "</unitdate>";
+	       END;
+	   ELSE;
+	       "</unitdate>"; 
+	   END;
+       
+       IF object.bulk_date_from;
+          "<unitdate type=\"bulk\">" _ object.bulk_date_from; 
+           
+          IF object.bulk_date_to;
+            IF object.bulk_date_to == object.bulk_date_from;
+            "</unitdate>";
+            ELSE;
+             "-" _ object.bulk_date_to _ "</unitdate>"; 
+            END;
+          ELSE;
+            "</unitdate>";
         END;
+        END;
+        
       END;
 -%]
 
