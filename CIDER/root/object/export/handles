@@ -6,6 +6,7 @@
 
 [% FOR object IN objects -%]
 [% IF object.type =='item' -%]
+[% IF object.digital_objects -%]
 [%# If there are multiple digital object class instances, you
     need to extract the PID to be the Fedora object ID. Otherwise
     there is a PID at the top level of the group. -%]
@@ -72,6 +73,7 @@
       </classes>
     </item>
   </update>
+  [% END -%]
 
 [% ELSE -%]
     <update>

@@ -12,7 +12,7 @@
         <admin:createdby>CIDER</admin:createdby>
         
 [% IF object.type == 'item' -%]
-
+[% IF object.digital_objects -%]
 [%# If there are multiple digital object class instances, you
     need to extract the PID to be the Fedora object ID. Otherwise
     there is a PID at the top level of the group. -%]
@@ -353,7 +353,7 @@
             <file>[% matches.0 -%].archival[% digital_object.file_extension -%]</file>
             [% END -%]
        
-
+[% END -%]
         [% END -%]
         
         
